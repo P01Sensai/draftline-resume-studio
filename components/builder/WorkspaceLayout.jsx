@@ -2,7 +2,8 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check } from 'lucide-react';
+import { useStore } from 'zustand';
+import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check, Undo2, Redo2 } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import Editor from './Editor/Editor';
 import Preview from './Preview/Preview';
@@ -13,6 +14,7 @@ export default function WorkspaceLayout() {
   const [isPrinting, setIsPrinting] = useState(false);
   const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved
   const { resumes, activeResumeId, updateActiveResume, theme, toggleTheme } = useResumeStore();
+  const { undo, redo, pastStates, futureStates } = useStore(useResumeStore.temporal, (state) => state);
   const resume = resumes.find(r => r.id === activeResumeId);
 
   const printRef = useRef(null);
@@ -64,6 +66,28 @@ export default function WorkspaceLayout() {
           </div>
 
           <div className="flex items-center gap-4">
+            
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => undo()}
+                disabled={pastStates.length === 0}
+                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Undo"
+              >
+                <Undo2 size={16} />
+              </button>
+              <button
+                onClick={() => redo()}
+                disabled={futureStates.length === 0}
+                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Redo"
+              >
+                <Redo2 size={16} />
+              </button>
+            </div>
+
+            <div className="h-4 w-px bg-gray-300 dark:bg-gray-700"></div>
+
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Template:</span>
               <select

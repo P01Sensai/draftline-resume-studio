@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { temporal } from 'zundo';
 
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -69,7 +70,8 @@ export const blankResume = {
 };
 
 export const useResumeStore = create(
-  (set, get) => ({
+  temporal(
+    (set, get) => ({
       user: null,
       setUser: (user) => set({ user }),
       theme: 'light',
@@ -234,5 +236,10 @@ export const useResumeStore = create(
             : r
         )
       })),
-    })
+    }),
+    {
+      partialize: (state) => ({ resumes: state.resumes, activeResumeId: state.activeResumeId }),
+      limit: 50,
+    }
+  )
 );
