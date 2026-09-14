@@ -41,7 +41,7 @@ export default function Editor({ activeDoc }) {
   };
 
   return (
-    <div className="font-body max-w-2xl mx-auto py-8 px-4">
+    <div className="font-body max-w-2xl mx-auto py-8 px-4 text-gray-900 dark:text-gray-100">
       <div className="mb-8">
         <MinimalField 
           label="Document Title" 
@@ -70,11 +70,11 @@ export default function Editor({ activeDoc }) {
 
           <MinimalSection title="Experience">
             {experience.map((exp, idx) => (
-              <div key={exp.id} className="p-4 bg-gray-50 rounded-xl mb-4 border border-gray-100">
+              <div key={exp.id} className="p-4 bg-gray-50 dark:bg-[#151621] rounded-xl mb-4 border border-gray-100 dark:border-gray-800 transition-colors">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Role {idx + 1}</span>
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role {idx + 1}</span>
                   {experience.length > 1 && (
-                    <button onClick={() => removeExperience(exp.id)} className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                    <button onClick={() => removeExperience(exp.id)} className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1">
                       <Trash2 size={16} />
                     </button>
                   )}
@@ -87,25 +87,25 @@ export default function Editor({ activeDoc }) {
                 </div>
                 
                 <div className="mt-2">
-                  <span className="block text-xs font-medium text-gray-700 mb-2">Highlights & Achievements</span>
+                  <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Highlights & Achievements</span>
                   {exp.bullets.map((b, i) => (
                     <div key={i} className="flex items-start gap-2 mb-2">
-                      <div className="mt-2.5 w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0"></div>
+                      <div className="mt-2.5 w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0"></div>
                       <textarea
                         value={b}
                         onChange={(e) => updateBullet(exp.id, i, e.target.value)}
                         placeholder="Led redesign of onboarding, lifting activation 18%"
                         rows={2}
-                        className="flex-1 bg-white border border-gray-200 rounded-md px-3 py-1.5 text-sm outline-none focus:border-[#0066FF] transition-colors resize-y"
+                        className="flex-1 bg-white dark:bg-[#0a0b14] border border-gray-200 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-[#0066FF] dark:focus:border-[#0066FF] transition-colors resize-y"
                       />
                       {exp.bullets.length > 1 && (
-                        <button onClick={() => removeBullet(exp.id, i)} className="mt-1.5 text-gray-400 hover:text-red-500 p-1 shrink-0">
+                        <button onClick={() => removeBullet(exp.id, i)} className="mt-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1 shrink-0">
                           <X size={14} />
                         </button>
                       )}
                     </div>
                   ))}
-                  <button onClick={() => addBullet(exp.id)} className="text-xs font-medium text-[#0066FF] hover:text-blue-700 flex items-center gap-1 mt-2 p-1 rounded hover:bg-blue-50 transition-colors">
+                  <button onClick={() => addBullet(exp.id)} className="text-xs font-medium text-[#0066FF] dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 mt-2 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
                     <Plus size={14} /> Add bullet point
                   </button>
                 </div>
@@ -113,7 +113,7 @@ export default function Editor({ activeDoc }) {
             ))}
             <button
               onClick={addExperience}
-              className="text-sm font-medium flex items-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 w-full justify-center text-gray-500 hover:border-[#0066FF] hover:text-[#0066FF] transition-colors"
+              className="text-sm font-medium flex items-center gap-2 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 w-full justify-center text-gray-500 dark:text-gray-400 hover:border-[#0066FF] dark:hover:border-[#0066FF] hover:text-[#0066FF] dark:hover:text-[#0066FF] transition-colors"
             >
               <Plus size={16} /> Add Experience
             </button>
@@ -121,11 +121,11 @@ export default function Editor({ activeDoc }) {
 
           <MinimalSection title="Education" defaultOpen={false}>
             {education.map((ed, idx) => (
-              <div key={ed.id} className="p-4 bg-gray-50 rounded-xl mb-4 border border-gray-100">
+              <div key={ed.id} className="p-4 bg-gray-50 dark:bg-[#151621] rounded-xl mb-4 border border-gray-100 dark:border-gray-800 transition-colors">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">School {idx + 1}</span>
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">School {idx + 1}</span>
                   {education.length > 1 && (
-                    <button onClick={() => removeEducation(ed.id)} className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                    <button onClick={() => removeEducation(ed.id)} className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1">
                       <Trash2 size={16} />
                     </button>
                   )}
@@ -140,7 +140,7 @@ export default function Editor({ activeDoc }) {
             ))}
             <button
               onClick={addEducation}
-              className="text-sm font-medium flex items-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 w-full justify-center text-gray-500 hover:border-[#0066FF] hover:text-[#0066FF] transition-colors"
+              className="text-sm font-medium flex items-center gap-2 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 w-full justify-center text-gray-500 dark:text-gray-400 hover:border-[#0066FF] dark:hover:border-[#0066FF] hover:text-[#0066FF] dark:hover:text-[#0066FF] transition-colors"
             >
               <Plus size={16} /> Add Education
             </button>
@@ -149,9 +149,9 @@ export default function Editor({ activeDoc }) {
           <MinimalSection title="Skills" defaultOpen={false}>
             <div className="flex flex-wrap gap-2 mb-4">
               {skills.map((s) => (
-                <span key={s} className="flex items-center gap-1.5 bg-[#0066FF]/10 text-[#0066FF] font-medium text-xs px-3 py-1.5 rounded-full">
+                <span key={s} className="flex items-center gap-1.5 bg-[#0066FF]/10 dark:bg-[#0066FF]/20 text-[#0066FF] dark:text-blue-400 font-medium text-xs px-3 py-1.5 rounded-full transition-colors">
                   {s}
-                  <button onClick={() => setSkills(skills.filter((x) => x !== s))} className="hover:text-blue-800 transition-colors">
+                  <button onClick={() => setSkills(skills.filter((x) => x !== s))} className="hover:text-blue-800 dark:hover:text-blue-200 transition-colors">
                     <X size={12} />
                   </button>
                 </span>
@@ -163,7 +163,7 @@ export default function Editor({ activeDoc }) {
                 onChange={(e) => setSkillInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSkill())}
                 placeholder="Type a skill, hit Enter"
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#0066FF] focus:bg-white transition-colors"
+                className="flex-1 bg-gray-50 dark:bg-[#0a0b14] border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-[#0066FF] dark:focus:border-[#0066FF] focus:bg-white dark:focus:bg-[#151621] transition-colors"
               />
               <button onClick={handleAddSkill} className="px-4 bg-[#0066FF] text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Add</button>
             </div>

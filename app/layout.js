@@ -1,4 +1,5 @@
 import { Inter, Space_Grotesk, Courier_Prime, IBM_Plex_Mono } from "next/font/google";
+import ThemeProvider from "@/components/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -46,7 +47,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${courierPrime.variable} ${plexMono.variable}`}>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 transition-colors">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
