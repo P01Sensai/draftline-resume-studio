@@ -89,6 +89,7 @@ export default function DashboardGrid() {
             </button>
             <button
               onClick={handleCreateBlank}
+              onMouseEnter={() => router.prefetch('/builder')}
               className="bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-sm"
             >
               <Plus size={18} />
@@ -96,6 +97,7 @@ export default function DashboardGrid() {
             </button>
             <button
               onClick={handleCreateExample}
+              onMouseEnter={() => router.prefetch('/builder')}
               className="bg-[#0066FF] text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-blue-700 transition shadow-sm"
             >
               <Sparkles size={18} />
@@ -123,7 +125,12 @@ export default function DashboardGrid() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start">
                 {resumes.map(resume => (
-                  <div key={resume.id} className="group relative border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 hover:border-[#0066FF] dark:hover:border-[#0066FF] transition cursor-pointer bg-white dark:bg-[#1a1b26] shadow-sm hover:shadow-md" onClick={() => handleOpenResume(resume.id)}>
+                  <div 
+                    key={resume.id} 
+                    className="group relative border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 hover:border-[#0066FF] dark:hover:border-[#0066FF] transition cursor-pointer bg-white dark:bg-[#1a1b26] shadow-sm hover:shadow-md" 
+                    onClick={() => handleOpenResume(resume.id)}
+                    onMouseEnter={() => router.prefetch('/builder')}
+                  >
                     <div className="aspect-[1/1.4] w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg mb-4 p-2 overflow-hidden flex flex-col text-[4px] relative">
                        <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-[#1a1b26]/90 to-transparent z-10"></div>
                        <div className="font-bold mb-1 text-black dark:text-gray-300">{resume.personal.name || "Name"}</div>
