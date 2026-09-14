@@ -33,8 +33,17 @@ export default function LoginPage() {
     if (!email || !password) { setError('Please enter both email and password to sign up.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters long.'); return; }
     setLoading(true); setError(null); setMessage(null);
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) { setError(error.message); } else { setMessage('Check your email for the confirmation link!'); }
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) { 
+      setError(error.message); 
+    } else { 
+      if (data?.session) {
+        router.push('/'); 
+        router.refresh();
+      } else {
+        setMessage('Check your email for the confirmation link!'); 
+      }
+    }
     setLoading(false);
   };
 
@@ -50,28 +59,28 @@ export default function LoginPage() {
   const springTransition = { type: "spring", stiffness: 400, damping: 30 };
 
   return (
-    <div className={`relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#050505] text-white ${theme}`}>
+    <div className={`relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 transition-colors ${theme}`}>
       
-      {/* Immersive Animated Background */}
+      {/* Immersive Animated Background - Matches Dashboard */}
       <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
         <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2], x: [0, 50, 0], y: [0, -50, 0] }} 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.7, 0.5], x: [0, 50, 0], y: [0, -50, 0] }} 
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[10%] left-[20%] w-[40vw] h-[40vw] rounded-full bg-[#0066FF] blur-[150px] mix-blend-screen opacity-30"
+          className="absolute top-[-10%] left-[-5%] w-[50vw] h-[50vw] rounded-full bg-blue-200 dark:bg-[#203a70] opacity-50 dark:opacity-40 blur-[100px]"
         />
         <motion.div 
-          animate={{ scale: [1, 1.5, 1], opacity: [0.1, 0.3, 0.1], x: [0, -50, 0], y: [0, 50, 0] }} 
+          animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0.8, 0.6], x: [0, -50, 0], y: [0, 50, 0] }} 
           transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600 blur-[200px] mix-blend-screen opacity-20"
+          className="absolute top-[20%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-blue-300 dark:bg-[#1a4a6b] opacity-60 dark:opacity-30 blur-[120px]"
         />
         <motion.div 
-          animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }} 
+          animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.6, 0.4] }} 
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-          className="absolute top-[40%] right-[40%] w-[30vw] h-[30vw] rounded-full bg-purple-600 blur-[150px] mix-blend-screen opacity-20"
+          className="absolute bottom-[-20%] left-[25%] w-[55vw] h-[55vw] rounded-full bg-purple-200 dark:bg-[#381a4a] opacity-40 dark:opacity-30 blur-[140px]"
         />
       </div>
 
-      <Link href="/" className="absolute top-8 left-8 z-20 inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors">
+      <Link href="/" className="absolute top-8 left-8 z-20 inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-colors">
         <ArrowLeft size={16} /> Back to home
       </Link>
 
@@ -83,15 +92,15 @@ export default function LoginPage() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={springTransition}
-            className="w-12 h-12 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-2xl"
+            className="w-12 h-12 bg-white/50 dark:bg-white/10 rounded-2xl border border-white/60 dark:border-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-[0_4px_20px_rgba(0,102,255,0.1)] dark:shadow-2xl"
           >
-            <Sparkles size={24} className="text-blue-400" />
+            <Sparkles size={24} className="text-[#0066FF] dark:text-blue-400" />
           </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...springTransition, delay: 0.1 }}
-            className="text-3xl font-bold tracking-tight mb-2"
+            className="text-3xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white"
           >
             Draftline
           </motion.h1>
@@ -99,7 +108,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...springTransition, delay: 0.2 }}
-            className="text-white/50 text-sm"
+            className="text-gray-500 dark:text-white/50 text-sm"
           >
             Sign in to access your workspace
           </motion.p>
@@ -109,7 +118,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...springTransition, delay: 0.3 }}
-          className="bg-white/5 backdrop-blur-2xl p-8 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/10"
+          className="bg-white/60 dark:bg-white/5 backdrop-blur-2xl p-8 rounded-[2rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] border border-white/50 dark:border-white/10"
         >
           {error && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6 p-4 bg-red-500/10 text-red-400 rounded-xl text-sm flex items-start gap-3 border border-red-500/20">
@@ -127,16 +136,16 @@ export default function LoginPage() {
 
           <form className="space-y-5" onSubmit={handleEmailLogin}>
             <div>
-              <label className="block text-xs font-medium text-white/60 uppercase tracking-wider mb-2 ml-1">Email</label>
+              <label className="block text-xs font-medium text-gray-500 dark:text-white/60 uppercase tracking-wider mb-2 ml-1">Email</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-blue-400 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 dark:text-white/30 group-focus-within:text-[#0066FF] dark:group-focus-within:text-blue-400 transition-colors">
                   <Mail size={18} />
                 </div>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl outline-none focus:border-blue-500/50 focus:bg-black/40 transition-all text-sm placeholder:text-white/20 text-white"
+                  className="w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl outline-none focus:border-[#0066FF] dark:focus:border-blue-500/50 focus:bg-white dark:focus:bg-black/40 transition-all text-sm placeholder:text-gray-400 dark:placeholder:text-white/20 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#0066FF]/10 dark:focus:ring-transparent"
                   placeholder="you@example.com"
                   required
                 />
@@ -144,16 +153,16 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-white/60 uppercase tracking-wider mb-2 ml-1">Password</label>
+              <label className="block text-xs font-medium text-gray-500 dark:text-white/60 uppercase tracking-wider mb-2 ml-1">Password</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-blue-400 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 dark:text-white/30 group-focus-within:text-[#0066FF] dark:group-focus-within:text-blue-400 transition-colors">
                   <Lock size={18} />
                 </div>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-black/20 border border-white/10 rounded-xl outline-none focus:border-blue-500/50 focus:bg-black/40 transition-all text-sm placeholder:text-white/20 text-white"
+                  className="w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl outline-none focus:border-[#0066FF] dark:focus:border-blue-500/50 focus:bg-white dark:focus:bg-black/40 transition-all text-sm placeholder:text-gray-400 dark:placeholder:text-white/20 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#0066FF]/10 dark:focus:ring-transparent"
                   placeholder="••••••••"
                   required
                 />
@@ -165,7 +174,7 @@ export default function LoginPage() {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-medium transition-colors shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] disabled:opacity-70 disabled:shadow-none flex justify-center items-center h-12"
+                className="w-full bg-[#0066FF] hover:bg-blue-700 text-white py-3.5 rounded-xl font-medium transition-colors shadow-[0_4px_14px_0_rgba(0,102,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,102,255,0.23)] disabled:opacity-70 disabled:shadow-none flex justify-center items-center h-12"
               >
                 {loading ? <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Sign In'}
               </motion.button>
@@ -175,7 +184,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={handleEmailSignup}
                 disabled={loading}
-                className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3.5 rounded-xl font-medium transition-colors disabled:opacity-70 h-12"
+                className="w-full bg-white/40 hover:bg-white/60 dark:bg-white/5 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white py-3.5 rounded-xl font-medium transition-colors disabled:opacity-70 h-12"
               >
                 Create Account
               </motion.button>
@@ -184,10 +193,10 @@ export default function LoginPage() {
 
           <div className="mt-8 relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
+              <div className="w-full border-t border-gray-200 dark:border-white/10"></div>
             </div>
             <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-semibold">
-              <span className="px-4 bg-transparent text-white/30 backdrop-blur-2xl">Or continue with</span>
+              <span className="px-4 bg-transparent text-gray-400 dark:text-white/30 backdrop-blur-2xl">Or continue with</span>
             </div>
           </div>
 
@@ -195,7 +204,7 @@ export default function LoginPage() {
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="mt-6 w-full flex justify-center items-center gap-3 bg-white text-black py-3.5 rounded-xl font-medium hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-70 h-12"
+            className="mt-6 w-full flex justify-center items-center gap-3 bg-white dark:bg-white border border-gray-200 dark:border-transparent text-gray-700 dark:text-black py-3.5 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-100 transition-colors shadow-sm disabled:opacity-70 h-12"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
