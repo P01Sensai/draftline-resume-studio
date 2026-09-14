@@ -3,6 +3,7 @@
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut } from 'lucide-react';
+import { motion } from 'framer-motion';
 import BentoCard from './BentoCard';
 import { useResumeStore } from '@/store/useResumeStore';
 import { createClient } from '@/utils/supabase/client';
@@ -56,10 +57,24 @@ export default function DashboardGrid() {
     await supabase.auth.signOut();
   };
 
+  const springTransition = { type: "spring", stiffness: 400, damping: 30 };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: springTransition }
+  };
+
   return (
-    <div 
+    <motion.div 
+      initial="hidden"
+      animate="show"
+      variants={{
+        show: {
+          transition: {
+            staggerChildren: 0.1
+          }
+        }
+      }}
       ref={containerRef} 
-      onMouseMove={onMove} 
       className="relative min-h-screen bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 font-body p-8 md:p-12 lg:p-16 overflow-hidden transition-colors"
     >
       {/* Animated Subtle Aurora Blobs for Clean Slate Theme */}
@@ -83,17 +98,18 @@ export default function DashboardGrid() {
       <div className="relative z-10 max-w-6xl mx-auto">
         <header className="mb-10 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">My Workspace</h1>
-            <p className="text-gray-500 dark:text-gray-400">Manage your resumes and cover letters.</p>
+            <motion.h1 variants={itemVariants} className="text-3xl font-bold tracking-tight mb-2">My Workspace</motion.h1>
+            <motion.p variants={itemVariants} className="text-gray-500 dark:text-gray-400">Manage your resumes and cover letters.</motion.p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
+          <motion.div variants={itemVariants} className="flex items-center gap-3">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={toggleTheme}
               className="p-2.5 rounded-full bg-white dark:bg-[#1a1b26] text-gray-700 dark:text-gray-300 shadow-sm border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               title="Toggle Theme"
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            </motion.button>
             
             {user ? (
               <div className="flex items-center gap-3">
@@ -118,29 +134,31 @@ export default function DashboardGrid() {
               </button>
             )}
 
-            <button
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleCreateBlank}
               onMouseEnter={() => router.prefetch('/builder')}
               className="bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-sm"
             >
               <Plus size={18} />
               Blank Canvas
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleCreateExample}
               onMouseEnter={() => router.prefetch('/builder')}
-              className="bg-[#0066FF] text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-blue-700 transition shadow-sm"
+              className="bg-[#0066FF] text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-blue-700 transition shadow-sm hover:shadow-[0_4px_14px_0_rgba(0,102,255,0.39)]"
             >
               <Sparkles size={18} />
               Example Data
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[minmax(180px,_auto)]">
           
           {/* Main Resumes List - takes up 8 columns */}
-          <BentoCard className="md:col-span-8 md:row-span-2 flex flex-col bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50">
+          <BentoCard variants={itemVariants} className="md:col-span-8 md:row-span-2 flex flex-col bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <FileText size={20} className="text-[#0066FF]" />
@@ -156,13 +174,15 @@ export default function DashboardGrid() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start">
                 {resumes.map(resume => (
-                  <div 
+                  <motion.div 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     key={resume.id} 
-                    className="group relative border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 hover:border-[#0066FF] dark:hover:border-[#0066FF] transition cursor-pointer bg-white dark:bg-[#1a1b26] shadow-sm hover:shadow-md" 
+                    className="group relative border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 hover:border-[#0066FF] dark:hover:border-[#0066FF] transition-all cursor-pointer bg-white dark:bg-[#1a1b26] shadow-sm hover:shadow-md" 
                     onClick={() => handleOpenResume(resume.id)}
                     onMouseEnter={() => router.prefetch('/builder')}
                   >
-                    <div className="aspect-[1/1.4] w-full bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg mb-4 p-2 overflow-hidden flex flex-col text-[4px] relative">
+                    <div className="aspect-[1/1.4] w-full bg-gray-50 dark:bg-[#0f111a] border border-gray-100 dark:border-gray-800/50 rounded-lg mb-4 p-2 overflow-hidden flex flex-col text-[4px] relative">
                        <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-[#1a1b26]/90 to-transparent z-10"></div>
                        <div className="font-bold mb-1 text-black dark:text-gray-300">{resume.personal.name || "Name"}</div>
                        <div className="h-[1px] bg-gray-200 dark:bg-gray-700 mb-2 w-full"></div>
@@ -183,15 +203,15 @@ export default function DashboardGrid() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}
           </BentoCard>
 
           {/* Profile Completeness - 4 columns */}
-          <BentoCard className="md:col-span-4 bg-gradient-to-br from-[#f8faff] dark:from-[#0f1b3b] to-white dark:to-[#1a1b26] border-blue-100/50 dark:border-blue-900/30 flex flex-col justify-center items-center text-center shadow-[0_4px_20px_rgba(0,102,255,0.05)]">
-             <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/30 shadow-sm flex items-center justify-center mb-4 text-[#0066FF] dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+          <BentoCard variants={itemVariants} className="md:col-span-4 bg-gradient-to-br from-[#f8faff] dark:from-[#0f111a] to-white dark:to-[#1a1b26] border-blue-100/50 dark:border-gray-800/60 flex flex-col justify-center items-center text-center shadow-[0_4px_20px_rgba(0,102,255,0.03)] dark:shadow-none">
+             <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-[#151621] shadow-sm flex items-center justify-center mb-4 text-[#0066FF] dark:text-blue-400 border border-blue-100 dark:border-gray-800/50">
                <Target size={28} />
              </div>
              <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-100">Profile Health</h3>
@@ -203,7 +223,7 @@ export default function DashboardGrid() {
           </BentoCard>
 
           {/* Career Tips - 4 columns */}
-          <BentoCard className="md:col-span-4 flex flex-col bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50">
+          <BentoCard variants={itemVariants} className="md:col-span-4 flex flex-col bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Sparkles size={18} className="text-yellow-500" />
               Pro Tips
@@ -216,7 +236,7 @@ export default function DashboardGrid() {
           </BentoCard>
           
           {/* Stats - 4 columns, can be hidden on smaller screens or span differently */}
-          <BentoCard className="md:col-span-8 lg:col-span-4 flex flex-col justify-center bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50">
+          <BentoCard variants={itemVariants} className="md:col-span-8 lg:col-span-4 flex flex-col justify-center bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50">
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <TrendingUp size={18} className="text-green-500" />
               Activity
@@ -243,6 +263,6 @@ export default function DashboardGrid() {
 
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
