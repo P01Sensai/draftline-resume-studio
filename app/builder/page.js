@@ -1,13 +1,11 @@
-import BuilderClient from "@/components/builder/BuilderClient";
+import WorkspaceLayout from "@/components/builder/WorkspaceLayout";
 
 export const metadata = {
-  title: "Resume & Cover Letter Builder",
-  description:
-    "Write your resume and cover letter with a live paper preview. Switch templates, download as PDF — free, no sign-up.",
-  alternates: { canonical: "/builder" },
-  robots: { index: true, follow: true },
+  title: "Builder — Draftline",
+  description: "Edit your resume and cover letter.",
+  robots: { index: false, follow: false },
 };
 
 export default function BuilderPage() {
-  return <BuilderClient />;
+  return <WorkspaceLayout />;
 }
