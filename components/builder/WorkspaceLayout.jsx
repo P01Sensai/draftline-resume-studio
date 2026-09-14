@@ -16,7 +16,7 @@ export default function WorkspaceLayout() {
   const printRef = useRef(null);
   
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: resume?.title ? resume.title.replace(/\s+/g, '_') : 'Resume',
   });
 
