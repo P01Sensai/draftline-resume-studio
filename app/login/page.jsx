@@ -51,7 +51,7 @@ export default function LoginPage() {
     setLoading(true); setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/` },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
     if (error) { setError(error.message); setLoading(false); }
   };
@@ -88,14 +88,6 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-[420px] px-6">
         
         <div className="text-center mb-8 flex flex-col items-center">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={springTransition}
-            className="w-12 h-12 bg-white/50 dark:bg-white/10 rounded-2xl border border-white/60 dark:border-white/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-[0_4px_20px_rgba(0,102,255,0.1)] dark:shadow-2xl"
-          >
-            <Sparkles size={24} className="text-[#0066FF] dark:text-blue-400" />
-          </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

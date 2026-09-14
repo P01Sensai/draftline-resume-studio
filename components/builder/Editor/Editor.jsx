@@ -25,6 +25,7 @@ export default function Editor({ activeDoc }) {
     removeEducation,
     setSkills,
     updateCoverLetter,
+    user,
   } = useResumeStore();
 
   const resume = resumes.find(r => r.id === activeResumeId);
@@ -134,6 +135,7 @@ export default function Editor({ activeDoc }) {
                           role={exp.role} 
                           company={exp.company} 
                           onEnhance={(newText) => updateBullet(exp.id, i, newText)} 
+                          isLocked={!user}
                         />
                         {exp.bullets.length > 1 && (
                           <button onClick={() => removeBullet(exp.id, i)} className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1 flex justify-center">
@@ -245,6 +247,7 @@ export default function Editor({ activeDoc }) {
                   company={coverLetter.company} 
                   type="cover"
                   onEnhance={(newText) => updateCoverLetter({ body: newText })} 
+                  isLocked={!user}
                 />
               </div>
             </div>

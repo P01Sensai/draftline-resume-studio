@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, ChevronDown } from 'lucide-react';
+import { Sparkles, ChevronDown, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-export default function AIEnhanceButton({ text, role, company, type = 'bullet', onEnhance }) {
+export default function AIEnhanceButton({ text, role, company, type = 'bullet', onEnhance, isLocked = false }) {
   const [isLoading, setIsLoading] = useState(false);
   const [tone, setTone] = useState("Action-Oriented");
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const router = useRouter();
   
   // Close dropdown on click outside
   useEffect(() => {
@@ -20,6 +22,11 @@ export default function AIEnhanceButton({ text, role, company, type = 'bullet', 
   }, []);
 
   const handleEnhance = async (selectedTone = tone) => {
+    if (isLocked) {
+      alert("Sign in to unlock AI features for this section!");
+      router.push('/login');
+      return;
+    }
     if (!text || text.trim() === '') return;
     
     setIsLoading(true);
@@ -49,23 +56,25 @@ export default function AIEnhanceButton({ text, role, company, type = 'bullet', 
 
   return (
     <div className="relative flex items-center shrink-0" ref={dropdownRef}>
-      <div className="flex bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/60 rounded-md shadow-sm transition-colors">
+      <div className={`flex border rounded-md shadow-sm transition-colors ${isLocked ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700' : 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800/60'}`}>
         <button 
           onClick={() => handleEnhance(tone)}
-          disabled={isLoading || !text}
-          className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-50 transition-colors flex items-center gap-1 border-r border-indigo-100 dark:border-indigo-800/60 rounded-l-md"
-          title={`Enhance with AI (${tone})`}
+          disabled={!isLocked && (isLoading || !text)}
+          className={`p-1.5 transition-colors flex items-center gap-1 border-r rounded-l-md ${isLocked ? 'text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700' : 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-50 border-indigo-100 dark:border-indigo-800/60'}`}
+          title={isLocked ? "Sign in to unlock!" : `Enhance with AI (${tone})`}
         >
-          {isLoading ? (
+          {isLocked ? (
+            <Lock size={16} />
+          ) : isLoading ? (
             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
           ) : (
             <Sparkles size={16} />
           )}
         </button>
         <button 
-          onClick={() => setShowDropdown(!showDropdown)}
-          disabled={isLoading}
-          className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-50 transition-colors rounded-r-md"
+          onClick={() => !isLocked && setShowDropdown(!showDropdown)}
+          disabled={isLocked || isLoading}
+          className={`p-1.5 transition-colors rounded-r-md ${isLocked ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50' : 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 disabled:opacity-50'}`}
         >
           <ChevronDown size={14} />
         </button>
