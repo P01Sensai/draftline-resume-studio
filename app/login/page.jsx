@@ -11,6 +11,8 @@ import { motion } from 'framer-motion';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
@@ -23,17 +25,18 @@ export default function LoginPage() {
     e.preventDefault();
     if (!email || !password) { setError('Please enter both email and password.'); return; }
     setLoading(true); setError(null); setMessage(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (error) { setError(error.message); } else { router.push('/'); router.refresh(); }
     setLoading(false);
   };
 
   const handleEmailSignup = async (e) => {
     e.preventDefault();
-    if (!email || !password) { setError('Please enter both email and password to sign up.'); return; }
+    if (!email || !password || !confirmPassword) { setError('Please fill out all fields to sign up.'); return; }
+    if (password !== confirmPassword) { setError('Passwords do not match.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters long.'); return; }
     setLoading(true); setError(null); setMessage(null);
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ email: email.trim(), password });
     if (error) { 
       setError(error.message); 
     } else { 
@@ -80,9 +83,7 @@ export default function LoginPage() {
         />
       </div>
 
-      <Link href="/" className="absolute top-8 left-8 z-20 inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-colors">
-        <ArrowLeft size={16} /> Back to home
-      </Link>
+
 
       {/* Glassmorphic Centered Card */}
       <div className="relative z-10 w-full max-w-[420px] px-6">
@@ -126,7 +127,7 @@ export default function LoginPage() {
             </motion.div>
           )}
 
-          <form className="space-y-5" onSubmit={handleEmailLogin}>
+          <form className="space-y-5" onSubmit={isSignUp ? handleEmailSignup : handleEmailLogin}>
             <div>
               <label className="block text-xs font-medium text-gray-500 dark:text-white/60 uppercase tracking-wider mb-2 ml-1">Email</label>
               <div className="relative group">
@@ -161,6 +162,30 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {isSignUp && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label className="block text-xs font-medium text-gray-500 dark:text-white/60 uppercase tracking-wider mb-2 ml-1 mt-5">Confirm Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 dark:text-white/30 group-focus-within:text-[#0066FF] dark:group-focus-within:text-blue-400 transition-colors">
+                    <Lock size={18} />
+                  </div>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl outline-none focus:border-[#0066FF] dark:focus:border-blue-500/50 focus:bg-white dark:focus:bg-black/40 transition-all text-sm placeholder:text-gray-400 dark:placeholder:text-white/20 text-gray-900 dark:text-white focus:ring-4 focus:ring-[#0066FF]/10 dark:focus:ring-transparent"
+                    placeholder="••••••••"
+                    required={isSignUp}
+                  />
+                </div>
+              </motion.div>
+            )}
+
             <div className="pt-4 flex flex-col gap-3">
               <motion.button
                 whileTap={{ scale: 0.98 }}
@@ -168,17 +193,21 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full bg-[#0066FF] hover:bg-blue-700 text-white py-3.5 rounded-xl font-medium transition-colors shadow-[0_4px_14px_0_rgba(0,102,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,102,255,0.23)] disabled:opacity-70 disabled:shadow-none flex justify-center items-center h-12"
               >
-                {loading ? <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Sign In'}
+                {loading ? <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : (isSignUp ? 'Create Account' : 'Sign In')}
               </motion.button>
               
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 type="button"
-                onClick={handleEmailSignup}
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError(null);
+                  setMessage(null);
+                }}
                 disabled={loading}
                 className="w-full bg-white/40 hover:bg-white/60 dark:bg-white/5 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-white py-3.5 rounded-xl font-medium transition-colors disabled:opacity-70 h-12"
               >
-                Create Account
+                {isSignUp ? 'Back to Sign In' : 'Create an Account'}
               </motion.button>
             </div>
           </form>
