@@ -33,6 +33,33 @@ export const defaultResume = {
   updatedAt: new Date().toISOString(),
 };
 
+export const blankResume = {
+  id: generateId(),
+  title: "Untitled Resume",
+  template: "typewriter",
+  personal: {
+    name: "",
+    title: "",
+    email: "",
+    phone: "",
+    location: "",
+    website: "",
+  },
+  summary: "",
+  experience: [],
+  education: [],
+  skills: [],
+  coverLetter: {
+    recipient: "",
+    company: "",
+    date: "",
+    salutation: "",
+    body: "",
+    closing: "",
+  },
+  updatedAt: new Date().toISOString(),
+};
+
 export const useResumeStore = create(
   persist(
     (set, get) => ({
@@ -45,6 +72,13 @@ export const useResumeStore = create(
       setActiveResume: (id) => set({ activeResumeId: id }),
       createResume: () => {
         const newResume = { ...defaultResume, id: generateId(), updatedAt: new Date().toISOString() };
+        set((state) => ({
+          resumes: [...state.resumes, newResume],
+          activeResumeId: newResume.id
+        }));
+      },
+      createBlankResume: () => {
+        const newResume = { ...blankResume, id: generateId(), updatedAt: new Date().toISOString() };
         set((state) => ({
           resumes: [...state.resumes, newResume],
           activeResumeId: newResume.id

@@ -1,10 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 import { TypewriterResume, LedgerResume, CoverLetterPreview } from '../templates/Templates';
 
-export default function Preview({ activeDoc, template }) {
+const Preview = forwardRef(({ activeDoc, template }, ref) => {
   const { resumes, activeResumeId } = useResumeStore();
   const resume = resumes.find(r => r.id === activeResumeId);
 
@@ -14,7 +14,7 @@ export default function Preview({ activeDoc, template }) {
 
   return (
     <div className="flex justify-center h-full items-start pt-8 lg:pt-0 lg:sticky lg:top-24">
-      <div className="print-paper border border-gray-200 dark:border-gray-800 shadow-xl bg-white w-full max-w-[640px] min-h-[880px] px-10 py-10 transition-all duration-300">
+      <div ref={ref} className="print-paper border border-gray-200 dark:border-gray-800 shadow-xl bg-white w-full max-w-[640px] min-h-[880px] px-10 py-10 transition-all duration-300">
         {activeDoc === "resume" ? (
           template === "typewriter" ? (
             <TypewriterResume personal={personal} summary={summary} experience={experience} education={education} skills={skills} />
@@ -27,4 +27,6 @@ export default function Preview({ activeDoc, template }) {
       </div>
     </div>
   );
-}
+});
+
+export default Preview;

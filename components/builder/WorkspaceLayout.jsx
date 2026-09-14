@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileText, Mail, Download, Moon, Sun } from 'lucide-react';
+import { useReactToPrint } from 'react-to-print';
 import Editor from './Editor/Editor';
 import Preview from './Preview/Preview';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -12,7 +13,12 @@ export default function WorkspaceLayout() {
   const { resumes, activeResumeId, updateActiveResume, theme, toggleTheme } = useResumeStore();
   const resume = resumes.find(r => r.id === activeResumeId);
 
-  const handlePrint = () => window.print();
+  const printRef = useRef(null);
+  
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: resume?.title ? resume.title.replace(/\s+/g, '_') : 'Resume',
+  });
 
   if (!resume) return <div className="p-8">Loading workspace...</div>;
 
@@ -84,7 +90,7 @@ export default function WorkspaceLayout() {
 
         {/* Preview Side */}
         <div className="bg-[#f8f9fc] dark:bg-[#0a0b14] overflow-y-auto p-4 lg:p-8 custom-scrollbar transition-colors" style={{ height: 'calc(100vh - 61px)' }}>
-          <Preview activeDoc={activeDoc} template={resume.template || 'typewriter'} />
+          <Preview ref={printRef} activeDoc={activeDoc} template={resume.template || 'typewriter'} />
         </div>
       </div>
     </div>

@@ -26,6 +26,7 @@ export default function DashboardGrid() {
   const resumes = useResumeStore((state) => state.resumes);
   const setActiveResume = useResumeStore((state) => state.setActiveResume);
   const createResume = useResumeStore((state) => state.createResume);
+  const createBlankResume = useResumeStore((state) => state.createBlankResume);
   const deleteResume = useResumeStore((state) => state.deleteResume);
   const theme = useResumeStore((state) => state.theme);
   const toggleTheme = useResumeStore((state) => state.toggleTheme);
@@ -33,7 +34,12 @@ export default function DashboardGrid() {
   const containerRef = useRef(null);
   const [pos, onMove] = useMousePct(containerRef);
 
-  const handleCreateNew = () => {
+  const handleCreateBlank = () => {
+    createBlankResume();
+    router.push('/builder');
+  };
+
+  const handleCreateExample = () => {
     createResume();
     router.push('/builder');
   };
@@ -82,11 +88,18 @@ export default function DashboardGrid() {
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <button
-              onClick={handleCreateNew}
-              className="bg-[#0066FF] text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-blue-700 transition shadow-sm"
+              onClick={handleCreateBlank}
+              className="bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-sm"
             >
               <Plus size={18} />
-              Create new
+              Blank Canvas
+            </button>
+            <button
+              onClick={handleCreateExample}
+              className="bg-[#0066FF] text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-blue-700 transition shadow-sm"
+            >
+              <Sparkles size={18} />
+              Example Data
             </button>
           </div>
         </header>
