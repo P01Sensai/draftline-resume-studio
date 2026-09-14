@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, X } from 'lucide-react';
 import { useResumeStore } from '@/store/useResumeStore';
-import { MinimalField, MinimalTextArea } from '../ui/FormFields';
+import { MinimalField, MinimalTextArea, MonthYearPicker } from '../ui/FormFields';
 import { MinimalSection } from '../ui/MinimalSection';
+import { COMMON_SKILLS, COMMON_TITLES, COMMON_LOCATIONS } from '@/lib/suggestions';
 
 export default function Editor({ activeDoc }) {
   const {
@@ -56,10 +57,10 @@ export default function Editor({ activeDoc }) {
           <MinimalSection title="Personal Details">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
               <MinimalField label="Full name" value={personal.name} onChange={(e) => updatePersonal({ name: e.target.value })} />
-              <MinimalField label="Title / role" value={personal.title} onChange={(e) => updatePersonal({ title: e.target.value })} />
+              <MinimalField label="Title / role" list="titles-list" value={personal.title} onChange={(e) => updatePersonal({ title: e.target.value })} />
               <MinimalField label="Email" value={personal.email} onChange={(e) => updatePersonal({ email: e.target.value })} />
               <MinimalField label="Phone" value={personal.phone} onChange={(e) => updatePersonal({ phone: e.target.value })} />
-              <MinimalField label="Location" value={personal.location} onChange={(e) => updatePersonal({ location: e.target.value })} />
+              <MinimalField label="Location" list="locations-list" value={personal.location} onChange={(e) => updatePersonal({ location: e.target.value })} />
               <MinimalField label="Website / portfolio" value={personal.website} onChange={(e) => updatePersonal({ website: e.target.value })} />
             </div>
           </MinimalSection>
@@ -80,10 +81,27 @@ export default function Editor({ activeDoc }) {
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                  <MinimalField label="Job title" value={exp.role} onChange={(e) => updateExperience(exp.id, { role: e.target.value })} />
+                  <MinimalField label="Job title" list="titles-list" value={exp.role} onChange={(e) => updateExperience(exp.id, { role: e.target.value })} />
                   <MinimalField label="Company" value={exp.company} onChange={(e) => updateExperience(exp.id, { company: e.target.value })} />
-                  <MinimalField label="Start Date" placeholder="Jan 2022" value={exp.start} onChange={(e) => updateExperience(exp.id, { start: e.target.value })} />
-                  <MinimalField label="End Date" placeholder="Present" value={exp.end} onChange={(e) => updateExperience(exp.id, { end: e.target.value })} />
+                  <MonthYearPicker label="Start Date" value={exp.start} onChange={(val) => updateExperience(exp.id, { start: val })} />
+                  
+                  <div className="relative">
+                    <MonthYearPicker 
+                      label="End Date" 
+                      value={exp.end} 
+                      onChange={(val) => updateExperience(exp.id, { end: val })} 
+                      disabled={exp.end === "Present"}
+                    />
+                    <label className="absolute right-0 top-0 flex items-center gap-1.5 text-[10px] text-gray-500 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={exp.end === "Present"} 
+                        onChange={(e) => updateExperience(exp.id, { end: e.target.checked ? "Present" : "" })} 
+                        className="w-3 h-3 cursor-pointer"
+                      />
+                      Current
+                    </label>
+                  </div>
                 </div>
                 
                 <div className="mt-2">
@@ -133,8 +151,25 @@ export default function Editor({ activeDoc }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
                   <MinimalField label="School" value={ed.school} onChange={(e) => updateEducation(ed.id, { school: e.target.value })} />
                   <MinimalField label="Degree" value={ed.degree} onChange={(e) => updateEducation(ed.id, { degree: e.target.value })} />
-                  <MinimalField label="Start Date" value={ed.start} onChange={(e) => updateEducation(ed.id, { start: e.target.value })} />
-                  <MinimalField label="End Date" value={ed.end} onChange={(e) => updateEducation(ed.id, { end: e.target.value })} />
+                  <MonthYearPicker label="Start Date" value={ed.start} onChange={(val) => updateEducation(ed.id, { start: val })} />
+                  
+                  <div className="relative">
+                    <MonthYearPicker 
+                      label="End Date" 
+                      value={ed.end} 
+                      onChange={(val) => updateEducation(ed.id, { end: val })} 
+                      disabled={ed.end === "Present"}
+                    />
+                    <label className="absolute right-0 top-0 flex items-center gap-1.5 text-[10px] text-gray-500 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={ed.end === "Present"} 
+                        onChange={(e) => updateEducation(ed.id, { end: e.target.checked ? "Present" : "" })} 
+                        className="w-3 h-3 cursor-pointer"
+                      />
+                      Current
+                    </label>
+                  </div>
                 </div>
               </div>
             ))}
@@ -159,6 +194,7 @@ export default function Editor({ activeDoc }) {
             </div>
             <div className="flex gap-2">
               <input
+                list="skills-list"
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddSkill())}
@@ -185,6 +221,23 @@ export default function Editor({ activeDoc }) {
           </MinimalSection>
         </>
       )}
+
+      {/* Datalists for Auto-suggestions */}
+      <datalist id="titles-list">
+        {COMMON_TITLES.map((t) => (
+          <option key={t} value={t} />
+        ))}
+      </datalist>
+      <datalist id="locations-list">
+        {COMMON_LOCATIONS.map((l) => (
+          <option key={l} value={l} />
+        ))}
+      </datalist>
+      <datalist id="skills-list">
+        {COMMON_SKILLS.map((s) => (
+          <option key={s} value={s} />
+        ))}
+      </datalist>
     </div>
   );
 }
