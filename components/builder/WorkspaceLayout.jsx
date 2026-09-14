@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, FileText, Mail, Download, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import Editor from './Editor/Editor';
 import Preview from './Preview/Preview';
@@ -11,6 +11,7 @@ import { useResumeStore } from '@/store/useResumeStore';
 export default function WorkspaceLayout() {
   const [activeDoc, setActiveDoc] = useState("resume");
   const [isPrinting, setIsPrinting] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved
   const { resumes, activeResumeId, updateActiveResume, theme, toggleTheme } = useResumeStore();
   const resume = resumes.find(r => r.id === activeResumeId);
 
@@ -27,6 +28,14 @@ export default function WorkspaceLayout() {
   });
 
   if (!resume) return <div className="p-8">Loading workspace...</div>;
+
+  const handleManualSave = () => {
+    if (saveStatus !== "idle") return;
+    updateActiveResume({ updatedAt: new Date().toISOString() });
+    setSaveStatus("saving");
+    setTimeout(() => setSaveStatus("saved"), 400);
+    setTimeout(() => setSaveStatus("idle"), 2500);
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 font-body flex flex-col transition-colors">
@@ -75,6 +84,24 @@ export default function WorkspaceLayout() {
               title="Toggle Theme"
             >
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            <button
+              onClick={handleManualSave}
+              className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors border shadow-sm ${
+                saveStatus === 'saved' 
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800'
+                  : 'bg-white dark:bg-[#1a1b26] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
+            >
+              {saveStatus === 'saving' ? (
+                <svg className="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              ) : saveStatus === 'saved' ? (
+                <Check size={16} />
+              ) : (
+                <Save size={16} />
+              )}
+              {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Save'}
             </button>
             
             <button

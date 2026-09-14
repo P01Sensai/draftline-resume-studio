@@ -1,7 +1,15 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
-const generateId = () => Math.random().toString(36).substr(2, 9);
+const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older environments
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 
 export const emptyExperience = () => ({ id: generateId(), role: "", company: "", location: "", start: "", end: "", current: false, bullets: [""] });
 export const emptyEducation = () => ({ id: generateId(), school: "", degree: "", start: "", end: "" });
@@ -61,14 +69,16 @@ export const blankResume = {
 };
 
 export const useResumeStore = create(
-  persist(
-    (set, get) => ({
+  (set, get) => ({
+      user: null,
+      setUser: (user) => set({ user }),
       theme: 'light',
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
       resumes: [defaultResume],
       activeResumeId: defaultResume.id,
 
       // Dashboard Actions
+      setStoreState: (newState) => set(newState),
       setActiveResume: (id) => set({ activeResumeId: id }),
       createResume: () => {
         const newResume = { ...defaultResume, id: generateId(), updatedAt: new Date().toISOString() };
@@ -224,9 +234,5 @@ export const useResumeStore = create(
             : r
         )
       })),
-    }),
-    {
-      name: 'draftline-storage',
-    }
-  )
+    })
 );

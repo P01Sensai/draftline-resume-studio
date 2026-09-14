@@ -2,9 +2,10 @@
 
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun } from 'lucide-react';
+import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut } from 'lucide-react';
 import BentoCard from './BentoCard';
 import { useResumeStore } from '@/store/useResumeStore';
+import { createClient } from '@/utils/supabase/client';
 
 // Adapted cursor tracking for a subtle spotlight effect
 function useMousePct(ref) {
@@ -30,6 +31,8 @@ export default function DashboardGrid() {
   const deleteResume = useResumeStore((state) => state.deleteResume);
   const theme = useResumeStore((state) => state.theme);
   const toggleTheme = useResumeStore((state) => state.toggleTheme);
+  const user = useResumeStore((state) => state.user);
+  const supabase = createClient();
 
   const containerRef = useRef(null);
   const [pos, onMove] = useMousePct(containerRef);
@@ -47,6 +50,10 @@ export default function DashboardGrid() {
   const handleOpenResume = (id) => {
     setActiveResume(id);
     router.push('/builder');
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
@@ -87,12 +94,30 @@ export default function DashboardGrid() {
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button
-              onClick={() => router.push('/login')}
-              className="bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 px-5 py-2.5 rounded-full font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-sm"
-            >
-              Sign In
-            </button>
+            
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300 hidden sm:block">
+                  {user.email}
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className="bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 p-2.5 rounded-full font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-sm"
+                  title="Sign Out"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => router.push('/login')}
+                onMouseEnter={() => router.prefetch('/login')}
+                className="bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 px-5 py-2.5 rounded-full font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-sm"
+              >
+                Sign In
+              </button>
+            )}
+
             <button
               onClick={handleCreateBlank}
               onMouseEnter={() => router.prefetch('/builder')}

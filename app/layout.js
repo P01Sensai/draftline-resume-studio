@@ -1,5 +1,6 @@
 import { Inter, Space_Grotesk, Courier_Prime, IBM_Plex_Mono } from "next/font/google";
 import ThemeProvider from "@/components/ThemeProvider";
+import CloudSyncProvider from "@/components/providers/CloudSyncProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -49,7 +50,9 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${courierPrime.variable} ${plexMono.variable}`}>
       <body className="font-body antialiased bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 transition-colors">
         <ThemeProvider>
-          {children}
+          <CloudSyncProvider>
+            {children}
+          </CloudSyncProvider>
         </ThemeProvider>
       </body>
     </html>
