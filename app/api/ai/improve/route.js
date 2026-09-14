@@ -16,14 +16,29 @@ export async function POST(req) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
     const isSummary = type === 'summary';
+    const isCover = type === 'cover';
+
+    let textTypeDesc = 'resume bullet point';
+    let contextDesc = `Context: The user worked as a ${role || 'professional'} at ${company || 'a company'}.`;
+    let toneActionDesc = 'starts with strong action verbs and emphasizes metrics';
+    
+    if (isSummary) {
+      textTypeDesc = 'professional summary paragraph';
+      contextDesc = `Context: The user is a ${role || 'professional'}.`;
+      toneActionDesc = 'dynamic and achievement-focused';
+    } else if (isCover) {
+      textTypeDesc = 'cover letter body';
+      contextDesc = `Context: The user is a ${role || 'professional'} writing a cover letter for ${company || 'a target company'}.`;
+      toneActionDesc = 'persuasive, professional, and enthusiastic';
+    }
 
     const prompt = `
-      You are an expert resume writer. Rewrite the following ${isSummary ? 'professional summary' : 'resume bullet point'} to make it more impactful.
-      ${isSummary ? `Context: The user is a ${role || 'professional'}.` : `Context: The user worked as a ${role || 'professional'} at ${company || 'a company'}.`}
-      Tone: ${tone || 'Professional'} (Ensure the output matches this tone: Professional = corporate and standard, Concise = short and to the point, Action-Oriented = ${isSummary ? 'dynamic and achievement-focused' : 'starts with strong action verbs and emphasizes metrics'}, Creative = slightly more descriptive).
+      You are an expert career coach and resume writer. Rewrite the following ${textTypeDesc} to make it more impactful.
+      ${contextDesc}
+      Tone: ${tone || 'Professional'} (Ensure the output matches this tone: Professional = corporate and standard, Concise = short and to the point, Action-Oriented = ${toneActionDesc}, Creative = slightly more descriptive).
       Original Text: "${text}"
       
-      Return ONLY the rewritten ${isSummary ? 'summary paragraph' : 'bullet point text'}. Do not include quotes, explanations, or introductory text.
+      Return ONLY the rewritten ${textTypeDesc}. Do not include quotes, explanations, or introductory text.
     `;
 
     const result = await model.generateContent(prompt);

@@ -236,7 +236,18 @@ export default function Editor({ activeDoc }) {
             </div>
           </MinimalSection>
           <MinimalSection title="Letter Body">
-            <MinimalTextArea label="Main paragraphs" rows={12} value={coverLetter.body} onChange={(e) => updateCoverLetter({ body: e.target.value })} />
+            <div className="flex flex-col">
+              <MinimalTextArea label="Main paragraphs" rows={12} value={coverLetter.body} onChange={(e) => updateCoverLetter({ body: e.target.value })} />
+              <div className="flex justify-end mt-[-10px] mb-4">
+                <AIEnhanceButton 
+                  text={coverLetter.body} 
+                  role={personal.title} 
+                  company={coverLetter.company} 
+                  type="cover"
+                  onEnhance={(newText) => updateCoverLetter({ body: newText })} 
+                />
+              </div>
+            </div>
             <MinimalField label="Closing" value={coverLetter.closing} onChange={(e) => updateCoverLetter({ closing: e.target.value })} />
           </MinimalSection>
         </>
