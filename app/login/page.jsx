@@ -20,6 +20,12 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      setError('Please enter both email and password.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setMessage(null);
@@ -40,6 +46,17 @@ export default function LoginPage() {
 
   const handleEmailSignup = async (e) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      setError('Please enter both email and password to sign up.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setMessage(null);
