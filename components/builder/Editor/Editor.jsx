@@ -5,6 +5,7 @@ import { Plus, Trash2, X } from 'lucide-react';
 import { useResumeStore } from '@/store/useResumeStore';
 import { MinimalField, MinimalTextArea, MonthYearPicker } from '../ui/FormFields';
 import { MinimalSection } from '../ui/MinimalSection';
+import AIEnhanceButton from './AIEnhanceButton';
 import { COMMON_SKILLS, COMMON_TITLES, COMMON_LOCATIONS } from '@/lib/suggestions';
 
 export default function Editor({ activeDoc }) {
@@ -66,7 +67,18 @@ export default function Editor({ activeDoc }) {
           </MinimalSection>
 
           <MinimalSection title="Professional Summary">
-            <MinimalTextArea label="A short intro about your background" rows={4} value={summary} onChange={(e) => updateActiveResume({ summary: e.target.value })} />
+            <div className="flex flex-col">
+              <MinimalTextArea label="A short intro about your background" rows={4} value={summary} onChange={(e) => updateActiveResume({ summary: e.target.value })} />
+              <div className="flex justify-end mt-[-10px] mb-4">
+                <AIEnhanceButton 
+                  text={summary} 
+                  role={personal.title} 
+                  company="" 
+                  type="summary"
+                  onEnhance={(newText) => updateActiveResume({ summary: newText })} 
+                />
+              </div>
+            </div>
           </MinimalSection>
 
           <MinimalSection title="Experience">
@@ -116,11 +128,19 @@ export default function Editor({ activeDoc }) {
                         rows={2}
                         className="flex-1 bg-white dark:bg-[#0a0b14] border border-gray-200 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-[#0066FF] dark:focus:border-[#0066FF] transition-colors resize-y"
                       />
-                      {exp.bullets.length > 1 && (
-                        <button onClick={() => removeBullet(exp.id, i)} className="mt-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1 shrink-0">
-                          <X size={14} />
-                        </button>
-                      )}
+                      <div className="flex flex-col gap-1 mt-1">
+                        <AIEnhanceButton 
+                          text={b} 
+                          role={exp.role} 
+                          company={exp.company} 
+                          onEnhance={(newText) => updateBullet(exp.id, i, newText)} 
+                        />
+                        {exp.bullets.length > 1 && (
+                          <button onClick={() => removeBullet(exp.id, i)} className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1 flex justify-center">
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                   <button onClick={() => addBullet(exp.id)} className="text-xs font-medium text-[#0066FF] dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 mt-2 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
