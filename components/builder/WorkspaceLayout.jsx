@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useStore } from 'zustand';
-import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check, Undo2, Redo2 } from 'lucide-react';
+import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check, Undo2, Redo2, Share2 } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
 import { PDFTypewriterResume, PDFLedgerResume, PDFCoverLetter } from './pdf/PDFTemplates';
 import Editor from './Editor/Editor';
@@ -20,26 +20,28 @@ export default function WorkspaceLayout() {
 
   const printRef = useRef(null);
   
+  const generatePDFBlob = async () => {
+    if (!resume) return null;
+    let doc;
+    if (activeDoc === "resume") {
+      if (resume.template === "typewriter" || !resume.template) {
+        doc = <PDFTypewriterResume personal={resume.personal} summary={resume.summary} experience={resume.experience} education={resume.education} skills={resume.skills} />;
+      } else {
+        doc = <PDFLedgerResume personal={resume.personal} summary={resume.summary} experience={resume.experience} education={resume.education} skills={resume.skills} />;
+      }
+    } else {
+      doc = <PDFCoverLetter personal={resume.personal} cover={resume.coverLetter} />;
+    }
+    return await pdf(doc).toBlob();
+  };
+
   const handleExportPDF = async () => {
     if (!resume) return;
     setIsPrinting(true);
-    
-    // Give UI a tiny tick to show the "Preparing..." state
     await new Promise(resolve => setTimeout(resolve, 50));
-    
     try {
-      let doc;
-      if (activeDoc === "resume") {
-        if (resume.template === "typewriter" || !resume.template) {
-          doc = <PDFTypewriterResume personal={resume.personal} summary={resume.summary} experience={resume.experience} education={resume.education} skills={resume.skills} />;
-        } else {
-          doc = <PDFLedgerResume personal={resume.personal} summary={resume.summary} experience={resume.experience} education={resume.education} skills={resume.skills} />;
-        }
-      } else {
-        doc = <PDFCoverLetter personal={resume.personal} cover={resume.coverLetter} />;
-      }
-      
-      const blob = await pdf(doc).toBlob();
+      const blob = await generatePDFBlob();
+      if (!blob) return;
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -56,6 +58,37 @@ export default function WorkspaceLayout() {
     } catch (error) {
       console.error("PDF generation failed:", error);
       alert("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsPrinting(false);
+    }
+  };
+
+  const handleSharePDF = async () => {
+    if (!resume) return;
+    setIsPrinting(true);
+    await new Promise(resolve => setTimeout(resolve, 50));
+    try {
+      const blob = await generatePDFBlob();
+      if (!blob) return;
+      
+      const prefix = activeDoc === "resume" ? "Resume" : "CoverLetter";
+      const fileName = `${resume.title ? resume.title.replace(/\s+/g, '_') : prefix}.pdf`;
+      const file = new File([blob], fileName, { type: 'application/pdf' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: fileName,
+          text: 'Here is my resume generated with Draftline!',
+        });
+      } else {
+        alert("Native sharing for files is not supported on your current browser. Please click Export PDF instead and share it manually.");
+      }
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error("Sharing failed:", error);
+        alert("Failed to share PDF.");
+      }
     } finally {
       setIsPrinting(false);
     }
@@ -160,6 +193,14 @@ export default function WorkspaceLayout() {
               {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Save'}
             </button>
             
+            <button
+              onClick={handleSharePDF}
+              disabled={isPrinting}
+              className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-wait"
+            >
+              <Share2 size={16} /> Share
+            </button>
+
             <button
               onClick={handleExportPDF}
               disabled={isPrinting}
