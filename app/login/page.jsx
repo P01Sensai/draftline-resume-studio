@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
@@ -20,18 +20,22 @@ export default function LoginPage() {
   // Deck state
   const totalCards = 3;
   const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [deckTimer, setDeckTimer] = useState(null);
+  const [cyclingCardIndex, setCyclingCardIndex] = useState(null);
+  const timerRef = useRef(null);
+  const activeIdxRef = useRef(0);
+  const isCyclingRef = useRef(false);
+
+  useEffect(() => {
+    activeIdxRef.current = activeCardIndex;
+  }, [activeCardIndex]);
 
   useEffect(() => {
     startDeckAnimation();
-    return () => {
-      if (deckTimer) clearInterval(deckTimer);
-    };
+    return () => pauseDeckAnimation();
   }, []);
 
   const getCardClass = (index) => {
-    if (isTransitioning && index === activeCardIndex) {
+    if (cyclingCardIndex === index) {
       return 'card-pos-cycling';
     }
     const relativeIndex = (index - activeCardIndex + totalCards) % totalCards;
@@ -39,37 +43,46 @@ export default function LoginPage() {
   };
 
   const cycleDeck = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
+    if (isCyclingRef.current) return;
+    isCyclingRef.current = true;
+    
+    setCyclingCardIndex(activeIdxRef.current);
 
     setTimeout(() => {
       setActiveCardIndex((prev) => (prev + 1) % totalCards);
       setTimeout(() => {
-        setIsTransitioning(false);
+        setCyclingCardIndex(null);
+        isCyclingRef.current = false;
       }, 450);
     }, 220);
   };
 
   const goToSlide = (targetIdx) => {
-    if (isTransitioning || targetIdx === activeCardIndex) return;
-    setIsTransitioning(true);
-    setActiveCardIndex(targetIdx);
+    if (isCyclingRef.current || targetIdx === activeIdxRef.current) return;
+    isCyclingRef.current = true;
+    
+    setCyclingCardIndex(activeIdxRef.current);
     setTimeout(() => {
-      setIsTransitioning(false);
-    }, 600);
+      setActiveCardIndex(targetIdx);
+      setTimeout(() => {
+        setCyclingCardIndex(null);
+        isCyclingRef.current = false;
+      }, 450);
+    }, 220);
   };
 
   const startDeckAnimation = () => {
-    const timer = setInterval(() => {
-      cycleDeck();
-    }, 4500);
-    setDeckTimer(timer);
+    if (!timerRef.current) {
+      timerRef.current = setInterval(() => {
+        cycleDeck();
+      }, 1500);
+    }
   };
 
   const pauseDeckAnimation = () => {
-    if (deckTimer) {
-      clearInterval(deckTimer);
-      setDeckTimer(null);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
   };
 
@@ -124,15 +137,17 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="w-full min-h-screen bg-[#f8f9ff] flex flex-col justify-center">
-      <div className="w-full max-w-[1360px] mx-auto min-h-screen flex flex-col lg:flex-row items-stretch justify-center relative shadow-sm border-x border-slate-200/60 bg-[#f8f9ff]">
+    <main className="w-full min-h-screen bg-gradient-to-br from-[#f8f9ff] via-[#f0f4ff] to-[#e6efff] flex flex-col justify-center relative overflow-hidden">
+      {/* Global Radial Glows & Grid Mesh Backdrop */}
+      <div className="absolute -top-28 -left-28 w-96 h-96 rounded-full bg-blue-400/15 blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-indigo-400/15 blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/4 right-1/4 w-72 h-72 rounded-full bg-blue-200/30 blur-3xl pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.07] pointer-events-none"></div>
+
+      <div className="w-full max-w-[1360px] mx-auto min-h-screen flex flex-col lg:flex-row items-stretch justify-center relative z-10">
         
         {/* LEFT COLUMN: Visual Branding & Interactive Resume Showcase */}
-        <div className="relative w-full lg:w-[54%] xl:w-[55%] bg-gradient-to-br from-[#f8f9ff] via-[#f0f4ff] to-[#e6efff] flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-14 border-b lg:border-b-0 lg:border-r border-slate-200 overflow-hidden">
-          {/* Radial Glows & Grid Mesh Backdrop */}
-          <div className="absolute -top-28 -left-28 w-96 h-96 rounded-full bg-blue-400/15 blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-10 right-0 w-96 h-96 rounded-full bg-indigo-400/15 blur-3xl pointer-events-none"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none"></div>
+        <div className="relative w-full lg:w-[54%] xl:w-[55%] flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-14">
           
           {/* Top Brand Bar */}
           <div className="relative z-10 flex items-center justify-between">
@@ -169,7 +184,7 @@ export default function LoginPage() {
 
             {/* Fluid Animated Resume Stack Deck */}
             <div 
-              className="relative mt-2 h-[375px] w-full max-w-lg mx-auto lg:mx-0 perspective-container group/deck"
+              className="relative mt-8 lg:mt-2 h-[280px] sm:h-[320px] lg:h-[375px] w-[120%] -ml-[10%] sm:w-full sm:ml-0 max-w-lg mx-auto lg:mx-0 perspective-container group/deck transform scale-[0.75] sm:scale-90 lg:scale-100 origin-top"
               onMouseEnter={pauseDeckAnimation}
               onMouseLeave={startDeckAnimation}
             >
@@ -402,8 +417,7 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT COLUMN: Elegant Authentication Form Deck */}
-        <div className="relative w-full lg:w-[46%] xl:w-[45%] bg-[#f4f7fb] flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 xl:p-14">
-          <div className="absolute top-1/4 right-10 w-72 h-72 rounded-full bg-blue-200/40 blur-3xl pointer-events-none"></div>
+        <div className="relative w-full lg:w-[46%] xl:w-[45%] flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 xl:p-14">
           
           <div className="relative z-10 w-full max-w-[440px]">
             {/* Mode Toggle Switcher Tabs */}
@@ -413,19 +427,19 @@ export default function LoginPage() {
                 type="button"
                 className={`flex-1 py-2 text-center rounded-lg font-label-md text-label-md transition-all duration-200 ${!isSignUp ? 'font-semibold text-slate-900 bg-white shadow-sm border border-slate-200/60' : 'font-medium text-slate-600 hover:text-slate-900'}`}
               >
-                Sign In
+                Log In
               </button>
               <button 
                 onClick={() => setIsSignUp(true)}
                 type="button"
                 className={`flex-1 py-2 text-center rounded-lg font-label-md text-label-md transition-all duration-200 ${isSignUp ? 'font-semibold text-slate-900 bg-white shadow-sm border border-slate-200/60' : 'font-medium text-slate-600 hover:text-slate-900'}`}
               >
-                Create Account
+                Sign Up
               </button>
             </div>
 
             {/* Auth Form Card */}
-            <div className="rounded-2xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-xl">
+            <div className="rounded-2xl bg-white border border-slate-200/90 p-6 sm:p-8 shadow-xl min-h-[580px]">
               <div className="mb-6 text-left">
                 <h2 className="font-headline-lg text-headline-lg text-slate-900 font-bold tracking-tight">
                   {isSignUp ? "Create your account" : "Welcome back"}
@@ -467,22 +481,20 @@ export default function LoginPage() {
 
               <form onSubmit={handleEmailAuth} className="space-y-4">
                 {/* Full Name */}
-                {isSignUp && (
-                  <div className="space-y-1.5 transition-all">
-                    <label className="block font-label-sm text-label-sm text-slate-700 font-medium">Full Name</label>
-                    <div className="relative rounded-lg border border-slate-200 bg-white focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                      <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">person</span>
-                      <input 
-                        type="text" 
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required={isSignUp}
-                        className="w-full bg-transparent pl-10 pr-4 py-2.5 rounded-lg text-slate-900 font-body-md text-body-md placeholder:text-slate-400 focus:outline-none" 
-                        placeholder="Pramanshu Prajapati" 
-                      />
-                    </div>
+                <div className={`space-y-1.5 transition-all duration-300 ease-in-out overflow-hidden ${isSignUp ? 'max-h-[100px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <label className="block font-label-sm text-label-sm text-slate-700 font-medium">Full Name</label>
+                  <div className="relative rounded-lg border border-slate-200 bg-white focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">person</span>
+                    <input 
+                      type="text" 
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required={isSignUp}
+                      className="w-full bg-transparent pl-10 pr-4 py-2.5 rounded-lg text-slate-900 font-body-md text-body-md placeholder:text-slate-400 focus:outline-none" 
+                      placeholder="Pramanshu Prajapati" 
+                    />
                   </div>
-                )}
+                </div>
 
                 {/* Email */}
                 <div className="space-y-1.5">
@@ -504,11 +516,11 @@ export default function LoginPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label className="block font-label-sm text-label-sm text-slate-700 font-medium">Password</label>
-                    {!isSignUp && (
+                    <div className={`transition-all duration-300 ease-in-out overflow-hidden ${!isSignUp ? 'max-h-[30px] opacity-100' : 'max-h-0 opacity-0'}`}>
                       <a href="#" className="font-label-sm text-label-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
                         Forgot password?
                       </a>
-                    )}
+                    </div>
                   </div>
                   <div className="relative rounded-lg border border-slate-200 bg-white focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
                     <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">lock</span>
@@ -528,8 +540,8 @@ export default function LoginPage() {
                       <span className="material-symbols-outlined text-lg">{showPassword ? 'visibility_off' : 'visibility'}</span>
                     </button>
                   </div>
-                  {isSignUp && (
-                    <div className="flex items-center justify-between pt-1">
+                  <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isSignUp ? 'max-h-[30px] opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 flex-1">
                         <div className={`h-1.5 flex-1 rounded-full ${password.length > 0 ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
                         <div className={`h-1.5 flex-1 rounded-full ${password.length >= 6 ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
@@ -537,26 +549,26 @@ export default function LoginPage() {
                       </div>
                       <span className="font-caption text-caption text-slate-500 ml-3">Must be at least 8 characters</span>
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                {isSignUp && (
-                  <div className="flex items-center justify-between pt-1">
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isSignUp ? 'max-h-[50px] opacity-100 mt-1' : 'max-h-0 opacity-0 mt-0'}`}>
+                  <div className="flex items-center justify-between">
                     <label className="flex items-start gap-2 cursor-pointer">
-                      <input type="checkbox" required className="w-4 h-4 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"/>
+                      <input type="checkbox" required={isSignUp} className="w-4 h-4 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"/>
                       <span className="font-caption text-caption text-slate-600 leading-tight">
                         I agree to the <a href="#" className="underline text-slate-900 hover:text-blue-600 font-medium transition-colors">Terms of Service</a> and <a href="#" className="underline text-slate-900 hover:text-blue-600 font-medium transition-colors">Privacy Policy</a>
                       </span>
                     </label>
                   </div>
-                )}
+                </div>
 
                 <button 
                   type="submit" 
                   disabled={loading}
                   className="w-full mt-2 py-3 px-6 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-label-md text-label-md font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 transition-all duration-200 disabled:opacity-70"
                 >
-                  <span>{loading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In to Draftline'}</span>
+                  <span>{loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Log In to Draftline'}</span>
                   {!loading && <span className="material-symbols-outlined text-base">arrow_forward</span>}
                 </button>
               </form>
@@ -575,7 +587,7 @@ export default function LoginPage() {
                   onClick={() => setIsSignUp(!isSignUp)}
                   className="ml-1 font-semibold text-blue-600 hover:text-blue-700 underline transition-colors"
                 >
-                  {isSignUp ? "Sign in" : "Create one free"}
+                  {isSignUp ? "Log In" : "Sign Up for free"}
                 </button>
               </p>
             </div>
