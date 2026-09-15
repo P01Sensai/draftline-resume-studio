@@ -44,95 +44,95 @@ const styles = StyleSheet.create({
     lineHeight: 1.2,
   },
   tw_title: {
-    fontFamily: 'Courier',
     fontSize: 10,
     textTransform: 'uppercase',
-    letterSpacing: 2,
-    marginTop: 2,
+    letterSpacing: 1.5,
+    marginBottom: 4,
   },
-  tw_contactLine: {
-    fontFamily: 'Courier',
+  tw_contact: {
     fontSize: 9,
-    color: '#444444',
+    fontFamily: 'Courier',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 6,
+    color: '#333333',
     gap: 12,
   },
-  tw_line: {
+  tw_divider: {
     height: 1.5,
     backgroundColor: '#000000',
-    marginTop: 12,
-    marginBottom: 12,
+    marginVertical: 10,
   },
   tw_summary: {
+    fontSize: 10.5,
     fontFamily: 'Courier',
-    fontSize: 10,
     lineHeight: 1.5,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   tw_sectionHeader: {
+    fontSize: 10,
     fontFamily: 'Courier-Bold',
-    fontSize: 9,
     textTransform: 'uppercase',
     letterSpacing: 2,
     borderBottomWidth: 1,
     borderBottomColor: '#000000',
-    paddingBottom: 4,
+    paddingBottom: 2,
     marginBottom: 8,
-    marginTop: 8,
+    marginTop: 10,
   },
   tw_expBlock: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   tw_expHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   tw_roleRow: {
     flexDirection: 'row',
+    alignItems: 'baseline',
   },
   tw_role: {
-    fontFamily: 'Helvetica-Bold',
     fontSize: 11,
+    fontFamily: 'Courier-Bold',
   },
   tw_company: {
-    fontFamily: 'Helvetica',
     fontSize: 11,
+    fontFamily: 'Courier',
   },
   tw_dates: {
-    fontFamily: 'Courier',
     fontSize: 9,
+    fontFamily: 'Courier',
   },
   tw_bullet: {
-    fontFamily: 'Courier',
-    fontSize: 10,
     flexDirection: 'row',
-    marginBottom: 3,
+    marginBottom: 2,
     paddingLeft: 8,
   },
   tw_bulletPoint: {
     width: 10,
     fontSize: 10,
+    fontFamily: 'Courier',
   },
   tw_bulletText: {
     flex: 1,
+    fontSize: 10,
+    fontFamily: 'Courier',
     lineHeight: 1.4,
   },
   tw_eduBlock: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    alignItems: 'baseline',
+    marginBottom: 4,
   },
   tw_eduText: {
-    fontFamily: 'Helvetica',
     fontSize: 10.5,
-  },
-  tw_skillsText: {
     fontFamily: 'Courier',
+  },
+  tw_skills: {
     fontSize: 10,
+    fontFamily: 'Courier',
     lineHeight: 1.5,
   },
 
@@ -293,8 +293,8 @@ export const PDFTypewriterResume = ({ personal, summary, experience, education, 
     <Page size="A4" style={styles.page}>
       <Text style={styles.tw_name}>{personal.name}</Text>
       <Text style={styles.tw_title}>{personal.title}</Text>
-      <ContactInfo personal={personal} style={styles.tw_contactLine} />
-      <View style={styles.tw_line} />
+      <ContactInfo personal={personal} style={styles.tw_contact} />
+      <View style={styles.tw_divider} />
       
       <Text style={styles.tw_summary}>{summary}</Text>
 
@@ -375,7 +375,7 @@ export const PDFTypewriterResume = ({ personal, summary, experience, education, 
       {skills?.length > 0 && (
         <View wrap={false}>
           <Text style={styles.tw_sectionHeader}>Skills</Text>
-          <Text style={styles.tw_skillsText}>{skills.join("  /  ")}</Text>
+          <Text style={styles.tw_skills}>{skills.join("  /  ")}</Text>
         </View>
       )}
     </Page>

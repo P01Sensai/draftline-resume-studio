@@ -15,60 +15,60 @@ export function ContactLine({ personal }) {
 export function TypewriterResume({ personal, summary, experience, education, projects = [], certificates = [], skills }) {
   return (
     <div className="text-black font-type">
-      <h1 className="text-[26px] leading-tight font-bold uppercase tracking-tight">{personal.name}</h1>
-      <p className="text-[12px] tracking-[0.15em] uppercase font-mono mt-0.5">{personal.title}</p>
+      <h1 className="text-[22px] leading-tight font-bold uppercase tracking-tight">{personal.name}</h1>
+      <p className="text-[11px] tracking-[0.15em] uppercase font-mono mt-0.5">{personal.title}</p>
       <ContactLine personal={personal} />
-      <div className="h-[2px] bg-black my-4" />
-      <p className="text-[12.5px] leading-relaxed mb-5 font-mono">{summary}</p>
+      <div className="h-[1.5px] bg-black my-2.5" />
+      <p className="text-[11.5px] leading-snug mb-3 font-mono">{summary}</p>
 
-      {experience.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 border-b border-black pb-1">Experience</h2>}
+      {experience.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-1.5 border-b border-black pb-0.5">Experience</h2>}
       {experience.map((exp) => (
-        <div key={exp.id} className="mb-4">
+        <div key={exp.id} className="mb-2.5">
           <div className="flex justify-between items-baseline">
-            <span className="text-[13.5px] font-bold">{exp.role || "Role"} <span className="font-normal">— {exp.company || "Company"}</span></span>
-            <span className="text-[10.5px] font-mono whitespace-nowrap ml-2">{exp.start} – {exp.end}</span>
+            <span className="text-[12px] font-bold">{exp.role || "Role"} <span className="font-normal">— {exp.company || "Company"}</span></span>
+            <span className="text-[10px] font-mono whitespace-nowrap ml-2">{exp.start} – {exp.end}</span>
           </div>
-          <ul className="mt-1 space-y-1">
+          <ul className="mt-0.5 space-y-0.5">
             {exp.bullets.filter(Boolean).map((b, i) => (
-              <li key={i} className="text-[12px] font-mono pl-3 relative before:content-['*'] before:absolute before:left-0">{b}</li>
+              <li key={i} className="text-[11px] leading-snug font-mono pl-3 relative before:content-['*'] before:absolute before:left-0">{b}</li>
             ))}
           </ul>
         </div>
       ))}
 
-      {projects.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 mt-4 border-b border-black pb-1">Projects</h2>}
+      {projects.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-1.5 mt-2.5 border-b border-black pb-0.5">Projects</h2>}
       {projects.map((proj) => (
-        <div key={proj.id} className="mb-4">
+        <div key={proj.id} className="mb-2.5">
           <div className="flex justify-between items-baseline">
-            <span className="text-[13.5px] font-bold">{proj.name || "Project Name"} {proj.link && <span className="font-normal">— {proj.link}</span>}</span>
+            <span className="text-[12px] font-bold">{proj.name || "Project Name"} {proj.link && <span className="font-normal">— {proj.link}</span>}</span>
           </div>
-          {proj.description && <p className="text-[12px] font-mono mt-1 mb-1">{proj.description}</p>}
-          <ul className="mt-1 space-y-1">
+          {proj.description && <p className="text-[11px] leading-snug font-mono mt-0.5 mb-0.5">{proj.description}</p>}
+          <ul className="mt-0.5 space-y-0.5">
             {proj.bullets.filter(Boolean).map((b, i) => (
-              <li key={i} className="text-[12px] font-mono pl-3 relative before:content-['*'] before:absolute before:left-0">{b}</li>
+              <li key={i} className="text-[11px] leading-snug font-mono pl-3 relative before:content-['*'] before:absolute before:left-0">{b}</li>
             ))}
           </ul>
         </div>
       ))}
 
-      {education.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 mt-4 border-b border-black pb-1">Education</h2>}
+      {education.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-1.5 mt-2.5 border-b border-black pb-0.5">Education</h2>}
       {education.map((ed) => (
-        <div key={ed.id} className="flex justify-between items-baseline mb-1.5 text-[12.5px]">
+        <div key={ed.id} className="flex justify-between items-baseline mb-1 text-[11.5px]">
           <span>{ed.degree || "Degree"} — {ed.school || "School"}</span>
-          <span className="text-[10.5px] font-mono">{ed.start} – {ed.end}</span>
+          <span className="text-[10px] font-mono">{ed.start} – {ed.end}</span>
         </div>
       ))}
 
-      {certificates.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 mt-4 border-b border-black pb-1">Certificates</h2>}
+      {certificates.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-1.5 mt-2.5 border-b border-black pb-0.5">Certificates</h2>}
       {certificates.map((cert) => (
-        <div key={cert.id} className="flex justify-between items-baseline mb-1.5 text-[12.5px]">
+        <div key={cert.id} className="flex justify-between items-baseline mb-1 text-[11.5px]">
           <span>{cert.name || "Certificate"} — {cert.issuer || "Issuer"}</span>
-          <span className="text-[10.5px] font-mono">{cert.date}</span>
+          <span className="text-[10px] font-mono">{cert.date}</span>
         </div>
       ))}
 
-      {skills.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 mt-4 border-b border-black pb-1">Skills</h2>}
-      {skills.length > 0 && <p className="text-[12px] font-mono">{skills.join("  /  ")}</p>}
+      {skills.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-1.5 mt-2.5 border-b border-black pb-0.5">Skills</h2>}
+      {skills.length > 0 && <p className="text-[11px] leading-snug font-mono">{skills.join("  /  ")}</p>}
     </div>
   );
 }
