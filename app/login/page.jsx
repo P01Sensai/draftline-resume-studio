@@ -194,17 +194,17 @@ export default function LoginPage() {
             
             {/* Mode Toggle Switcher Tabs */}
             <div className="mb-8 p-1.5 rounded-xl bg-gray-200/50 dark:bg-[#151621] flex items-center border border-gray-200 dark:border-gray-800">
-              <button 
+                <button 
                 onClick={() => { setIsSignUp(false); setError(null); setMessage(null); }}
                 className={`flex-1 py-2 text-center rounded-lg text-sm transition-all duration-200 ${!isSignUp ? 'bg-white dark:bg-[#222330] text-gray-900 dark:text-white font-semibold shadow-sm border border-gray-200/50 dark:border-gray-700' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 font-medium'}`}
               >
-                Sign In
+                Log In
               </button>
               <button 
                 onClick={() => { setIsSignUp(true); setError(null); setMessage(null); }}
                 className={`flex-1 py-2 text-center rounded-lg text-sm transition-all duration-200 ${isSignUp ? 'bg-white dark:bg-[#222330] text-gray-900 dark:text-white font-semibold shadow-sm border border-gray-200/50 dark:border-gray-700' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 font-medium'}`}
               >
-                Create Account
+                Sign Up
               </button>
             </div>
 
@@ -213,7 +213,7 @@ export default function LoginPage() {
               
               <div className="mb-8 text-left">
                 <h2 className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">
-                  {isSignUp ? "Create your account" : "Welcome back"}
+                  {isSignUp ? "Create an account" : "Welcome back"}
                 </h2>
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                   {isSignUp ? "Start generating intelligent, ATS-optimized resumes in seconds." : "Enter your credentials to continue building your career narrative."}
@@ -304,6 +304,7 @@ export default function LoginPage() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
                       className="space-y-1.5 overflow-hidden"
                     >
                       <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 ml-1 mt-4">Confirm Password</label>
@@ -331,7 +332,7 @@ export default function LoginPage() {
                     <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
                     <>
-                      <span>{isSignUp ? "Create Account" : "Sign In to Draftline"}</span>
+                      <span>{isSignUp ? "Sign Up" : "Log In to Draftline"}</span>
                       <ArrowRight size={18} />
                     </>
                   )}
