@@ -38,6 +38,37 @@ export default function DashboardGrid() {
   const containerRef = useRef(null);
   const [pos, onMove] = useMousePct(containerRef);
 
+  const activityData = React.useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const data = [];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    for (let i = 3; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      // We skip the default empty resume when counting real activity
+      const count = resumes.filter(r => {
+        if (!r.updatedAt || r.id === 'default') return false;
+        const updated = new Date(r.updatedAt);
+        return updated >= date && updated < nextDate;
+      }).length;
+
+      data.push({
+        dayName: dayNames[date.getDay()],
+        count,
+        isToday: i === 0,
+      });
+    }
+
+    return data;
+  }, [resumes]);
+
   const handleCreateBlank = () => {
     createBlankResume();
     router.push('/builder');
@@ -242,22 +273,29 @@ export default function DashboardGrid() {
               Activity
             </h3>
             <div className="flex items-end justify-center gap-6 h-full pb-2">
-               <div className="flex flex-col items-center gap-2 group">
-                 <div className="h-16 w-8 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900/50 rounded-t-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-800/50 transition-colors"></div>
-                 <span className="text-xs text-gray-400 font-medium">Mon</span>
-               </div>
-               <div className="flex flex-col items-center gap-2 group">
-                 <div className="h-24 w-8 bg-[#0066FF] rounded-t-lg shadow-[0_-2px_10px_rgba(0,102,255,0.2)]"></div>
-                 <span className="text-xs font-bold text-gray-900 dark:text-gray-100">Tue</span>
-               </div>
-               <div className="flex flex-col items-center gap-2 group">
-                 <div className="h-12 w-8 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900/50 rounded-t-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-800/50 transition-colors"></div>
-                 <span className="text-xs text-gray-400 font-medium">Wed</span>
-               </div>
-               <div className="flex flex-col items-center gap-2 group">
-                 <div className="h-20 w-8 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900/50 rounded-t-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-800/50 transition-colors"></div>
-                 <span className="text-xs text-gray-400 font-medium">Thu</span>
-               </div>
+               {activityData.map((data, index) => {
+                 let heightClass = "h-8";
+                 if (data.count === 1) heightClass = "h-12";
+                 if (data.count === 2) heightClass = "h-16";
+                 if (data.count === 3) heightClass = "h-20";
+                 if (data.count >= 4) heightClass = "h-24";
+                 
+                 if (data.isToday) {
+                   return (
+                     <div key={index} className="flex flex-col items-center gap-2 group cursor-default" title={`${data.count} updates today`}>
+                       <div className={`${heightClass} w-8 bg-[#0066FF] rounded-t-lg shadow-[0_-2px_10px_rgba(0,102,255,0.2)] transition-all duration-300`}></div>
+                       <span className="text-xs font-bold text-gray-900 dark:text-gray-100">{data.dayName}</span>
+                     </div>
+                   );
+                 } else {
+                   return (
+                     <div key={index} className="flex flex-col items-center gap-2 group cursor-default" title={`${data.count} updates`}>
+                       <div className={`${heightClass} w-8 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900/50 rounded-t-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-800/50 transition-all duration-300`}></div>
+                       <span className="text-xs text-gray-400 font-medium">{data.dayName}</span>
+                     </div>
+                   );
+                 }
+               })}
             </div>
           </BentoCard>
 
