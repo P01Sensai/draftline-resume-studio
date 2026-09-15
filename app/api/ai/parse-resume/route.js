@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import pdfParse from 'pdf-parse';
+const { PDFParse } = require('pdf-parse');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -21,20 +21,27 @@ export async function POST(req) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Extract text from PDF
-    const pdfData = await pdfParse(buffer);
-    const rawText = pdfData.text;
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const parser = new PDFParse(uint8Array);
+    await parser.load();
+    const textResult = await parser.getText();
+    const rawText = textResult.text;
 
     if (!rawText || rawText.trim() === '') {
       return Response.json({ error: 'Could not extract text from PDF' }, { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-3.6-flash',
+      generationConfig: { maxOutputTokens: 8192 }
+    });
 
     const prompt = `
       You are an expert resume data extractor. 
       I will provide you with the raw, unformatted text extracted from a PDF resume. 
       Your job is to parse this text and structure it EXACTLY into the following JSON format.
       Do NOT include markdown formatting (like \`\`\`json). Return ONLY raw JSON.
+      CRITICAL INSTRUCTION: Do NOT mix Projects and Experience. Academic/Personal projects must go into the "projects" array. Only employment history goes into the "experience" array.
 
       JSON Schema requirement:
       {
@@ -68,6 +75,27 @@ export async function POST(req) {
             "degree": "Degree (e.g. B.S. Computer Science)",
             "start": "Year",
             "end": "Year"
+          }
+        ],
+        "projects": [
+          {
+            "id": "generate-a-unique-string-id-proj-1",
+            "name": "Project Name",
+            "description": "Short description of project",
+            "link": "Project URL if any",
+            "bullets": [
+              "Bullet point 1",
+              "Bullet point 2"
+            ]
+          }
+        ],
+        "certificates": [
+          {
+            "id": "generate-a-unique-string-id-cert-1",
+            "name": "Certificate Name",
+            "issuer": "Issuing Organization",
+            "date": "Year or Date",
+            "link": "Credential URL if any"
           }
         ],
         "skills": ["Skill 1", "Skill 2", "Skill 3"]

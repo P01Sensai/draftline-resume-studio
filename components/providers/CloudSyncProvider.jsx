@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { useResumeStore, defaultResume } from '@/store/useResumeStore';
 
 export default function CloudSyncProvider({ children }) {
   const router = useRouter();
-  const pathname = usePathname();
+
   const supabase = useMemo(() => createClient(), []);
   
   const resumes = useResumeStore((state) => state.resumes);
@@ -24,13 +24,9 @@ export default function CloudSyncProvider({ children }) {
     async function initializeCloud() {
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session && pathname !== '/login') {
-        router.push('/login');
+      if (!session) {
+        if (isMounted) setIsInitializing(false);
         return;
-      }
-      
-      if (session && pathname === '/login') {
-        router.push('/');
       }
 
       if (session) {
@@ -73,7 +69,7 @@ export default function CloudSyncProvider({ children }) {
         setUser(null);
         setStoreState({ resumes: [defaultResume], activeResumeId: defaultResume.id });
         prevResumesRef.current = null;
-        if (pathname !== '/login') router.push('/login');
+        router.push('/login');
       }
     });
 
@@ -81,7 +77,7 @@ export default function CloudSyncProvider({ children }) {
       isMounted = false;
       authListener.subscription.unsubscribe();
     };
-  }, [pathname, router, supabase, setStoreState]);
+  }, [router, supabase, setStoreState, setUser]);
 
   useEffect(() => {
     if (isInitializing || !prevResumesRef.current) return;
@@ -119,7 +115,7 @@ export default function CloudSyncProvider({ children }) {
     return () => clearTimeout(timeoutId);
   }, [resumes, isInitializing, supabase]);
 
-  if (isInitializing && pathname !== '/login') {
+  if (isInitializing) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8f9fc] dark:bg-[#0a0b14]">
          <div className="h-8 w-8 border-4 border-[#0066FF] border-t-transparent rounded-full animate-spin"></div>

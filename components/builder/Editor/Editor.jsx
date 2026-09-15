@@ -23,6 +23,15 @@ export default function Editor({ activeDoc }) {
     updateEducation,
     addEducation,
     removeEducation,
+    updateProject,
+    addProject,
+    removeProject,
+    updateProjectBullet,
+    addProjectBullet,
+    removeProjectBullet,
+    updateCertificate,
+    addCertificate,
+    removeCertificate,
     setSkills,
     updateCoverLetter,
     user,
@@ -33,7 +42,7 @@ export default function Editor({ activeDoc }) {
 
   if (!resume) return <div className="p-8 text-gray-500">No active resume.</div>;
 
-  const { personal, summary, experience, education, skills, coverLetter } = resume;
+  const { personal, summary, experience, education, projects = [], certificates = [], skills, coverLetter } = resume;
 
   const handleAddSkill = () => {
     const v = skillInput.trim();
@@ -200,6 +209,88 @@ export default function Editor({ activeDoc }) {
               className="text-sm font-medium flex items-center gap-2 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 w-full justify-center text-gray-500 dark:text-gray-400 hover:border-[#0066FF] dark:hover:border-[#0066FF] hover:text-[#0066FF] dark:hover:text-[#0066FF] transition-colors"
             >
               <Plus size={16} /> Add Education
+            </button>
+          </MinimalSection>
+
+          <MinimalSection title="Projects" defaultOpen={false}>
+            {projects.map((proj, idx) => (
+              <div key={proj.id} className="p-4 bg-gray-50 dark:bg-[#151621] rounded-xl mb-4 border border-gray-100 dark:border-gray-800 transition-colors">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project {idx + 1}</span>
+                  <button onClick={() => removeProject(proj.id)} className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                  <MinimalField label="Project Name" value={proj.name} onChange={(e) => updateProject(proj.id, { name: e.target.value })} />
+                  <MinimalField label="Link / URL" value={proj.link} onChange={(e) => updateProject(proj.id, { link: e.target.value })} />
+                </div>
+                <div className="mb-4 mt-2">
+                  <MinimalField label="Short Description" value={proj.description} onChange={(e) => updateProject(proj.id, { description: e.target.value })} />
+                </div>
+                
+                <div className="mt-2">
+                  <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Key Highlights</span>
+                  {proj.bullets.map((b, i) => (
+                    <div key={i} className="flex items-start gap-2 mb-2">
+                      <div className="mt-2.5 w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0"></div>
+                      <textarea
+                        value={b}
+                        onChange={(e) => updateProjectBullet(proj.id, i, e.target.value)}
+                        placeholder="Project accomplishment or detail"
+                        rows={1}
+                        className="flex-1 bg-white dark:bg-[#0a0b14] border border-gray-200 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-[#0066FF] dark:focus:border-[#0066FF] transition-colors resize-y"
+                      />
+                      <div className="flex flex-col gap-1 mt-1">
+                        <AIEnhanceButton 
+                          text={b} 
+                          role={proj.name} 
+                          company="Project" 
+                          onEnhance={(newText) => updateProjectBullet(proj.id, i, newText)} 
+                          isLocked={!user}
+                        />
+                        <button onClick={() => removeProjectBullet(proj.id, i)} className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 p-1 flex justify-center">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={() => addProjectBullet(proj.id)} className="text-xs font-medium text-[#0066FF] dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 mt-2 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                    <Plus size={14} /> Add bullet point
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button
+              onClick={addProject}
+              className="text-sm font-medium flex items-center gap-2 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 w-full justify-center text-gray-500 dark:text-gray-400 hover:border-[#0066FF] dark:hover:border-[#0066FF] hover:text-[#0066FF] dark:hover:text-[#0066FF] transition-colors"
+            >
+              <Plus size={16} /> Add Project
+            </button>
+          </MinimalSection>
+
+          <MinimalSection title="Certificates" defaultOpen={false}>
+            {certificates.map((cert, idx) => (
+              <div key={cert.id} className="p-4 bg-gray-50 dark:bg-[#151621] rounded-xl mb-4 border border-gray-100 dark:border-gray-800 transition-colors">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Certificate {idx + 1}</span>
+                  <button onClick={() => removeCertificate(cert.id)} className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                  <MinimalField label="Certificate Name" value={cert.name} onChange={(e) => updateCertificate(cert.id, { name: e.target.value })} />
+                  <MinimalField label="Issuer" value={cert.issuer} onChange={(e) => updateCertificate(cert.id, { issuer: e.target.value })} />
+                  <MinimalField label="Date" value={cert.date} onChange={(e) => updateCertificate(cert.id, { date: e.target.value })} />
+                  <MinimalField label="Link / ID" value={cert.link} onChange={(e) => updateCertificate(cert.id, { link: e.target.value })} />
+                </div>
+              </div>
+            ))}
+            <button
+              onClick={addCertificate}
+              className="text-sm font-medium flex items-center gap-2 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl px-4 py-3 w-full justify-center text-gray-500 dark:text-gray-400 hover:border-[#0066FF] dark:hover:border-[#0066FF] hover:text-[#0066FF] dark:hover:text-[#0066FF] transition-colors"
+            >
+              <Plus size={16} /> Add Certificate
             </button>
           </MinimalSection>
 

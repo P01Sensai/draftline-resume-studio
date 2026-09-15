@@ -288,7 +288,7 @@ const ContactInfo = ({ personal, style }) => (
   </View>
 );
 
-export const PDFTypewriterResume = ({ personal, summary, experience, education, skills }) => (
+export const PDFTypewriterResume = ({ personal, summary, experience, education, projects = [], certificates = [], skills }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <Text style={styles.tw_name}>{personal.name}</Text>
@@ -321,6 +321,33 @@ export const PDFTypewriterResume = ({ personal, summary, experience, education, 
         </>
       )}
 
+      {projects?.length > 0 && (
+        <>
+          <Text style={styles.tw_sectionHeader}>Projects</Text>
+          {projects.map(proj => (
+            <View key={proj.id} style={styles.tw_expBlock} wrap={false}>
+              <View style={styles.tw_expHeader}>
+                <View style={styles.tw_roleRow}>
+                  <Text style={styles.tw_role}>{proj.name || "Project Name"} </Text>
+                  {proj.link && <Text style={styles.tw_company}>— {proj.link}</Text>}
+                </View>
+              </View>
+              {proj.description && (
+                <View style={styles.tw_bullet}>
+                  <Text style={styles.tw_bulletText}>{proj.description}</Text>
+                </View>
+              )}
+              {proj.bullets.filter(Boolean).map((b, i) => (
+                <View key={i} style={styles.tw_bullet}>
+                  <Text style={styles.tw_bulletPoint}>*</Text>
+                  <Text style={styles.tw_bulletText}>{b}</Text>
+                </View>
+              ))}
+            </View>
+          ))}
+        </>
+      )}
+
       {education?.length > 0 && (
         <>
           <Text style={styles.tw_sectionHeader}>Education</Text>
@@ -328,6 +355,18 @@ export const PDFTypewriterResume = ({ personal, summary, experience, education, 
             <View key={ed.id} style={styles.tw_eduBlock} wrap={false}>
               <Text style={styles.tw_eduText}>{ed.degree || "Degree"} — {ed.school || "School"}</Text>
               <Text style={styles.tw_dates}>{ed.start} – {ed.end}</Text>
+            </View>
+          ))}
+        </>
+      )}
+
+      {certificates?.length > 0 && (
+        <>
+          <Text style={styles.tw_sectionHeader}>Certificates</Text>
+          {certificates.map(cert => (
+            <View key={cert.id} style={styles.tw_eduBlock} wrap={false}>
+              <Text style={styles.tw_eduText}>{cert.name || "Certificate"} — {cert.issuer || "Issuer"}</Text>
+              <Text style={styles.tw_dates}>{cert.date}</Text>
             </View>
           ))}
         </>
@@ -343,7 +382,7 @@ export const PDFTypewriterResume = ({ personal, summary, experience, education, 
   </Document>
 );
 
-export const PDFLedgerResume = ({ personal, summary, experience, education, skills }) => (
+export const PDFLedgerResume = ({ personal, summary, experience, education, projects = [], certificates = [], skills }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.lg_header}>
@@ -387,6 +426,33 @@ export const PDFLedgerResume = ({ personal, summary, experience, education, skil
         </View>
       )}
 
+      {projects?.length > 0 && (
+        <View>
+          <View style={styles.lg_tableHeader}>
+            <Text style={styles.lg_thRole}>Project</Text>
+            <Text style={styles.lg_thCompany}>Description</Text>
+            <Text style={styles.lg_thDates}>Link</Text>
+          </View>
+          {projects.map(proj => (
+            <View key={proj.id} wrap={false}>
+              <View style={styles.lg_tr}>
+                <Text style={styles.lg_tdRole}>{proj.name || "Project Name"}</Text>
+                <Text style={styles.lg_tdCompany}>{proj.description || ""}</Text>
+                <Text style={styles.lg_tdDates}>{proj.link || ""}</Text>
+              </View>
+              <View style={styles.lg_bulletsRow}>
+                {proj.bullets.filter(Boolean).map((b, i) => (
+                  <View key={i} style={styles.lg_bullet}>
+                    <Text style={styles.lg_bulletPoint}>—</Text>
+                    <Text style={styles.lg_bulletText}>{b}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
+
       <View style={styles.lg_grid}>
         {education?.length > 0 && (
           <View style={styles.lg_col} wrap={false}>
@@ -400,12 +466,26 @@ export const PDFLedgerResume = ({ personal, summary, experience, education, skil
           </View>
         )}
         
-        {skills?.length > 0 && (
-          <View style={styles.lg_col} wrap={false}>
-            <Text style={styles.lg_sectionHeader}>Skills</Text>
-            <Text style={styles.lg_skillsText}>{skills.join(", ")}</Text>
-          </View>
-        )}
+        <View style={styles.lg_col} wrap={false}>
+          {certificates?.length > 0 && (
+            <View style={{ marginBottom: 12 }}>
+              <Text style={styles.lg_sectionHeader}>Certificates</Text>
+              {certificates.map(cert => (
+                <View key={cert.id} style={styles.lg_eduBlock}>
+                  <Text style={styles.lg_eduDegree}>{cert.name || "Certificate"}</Text>
+                  <Text style={styles.lg_eduDetails}>{cert.issuer || "Issuer"} · {cert.date}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {skills?.length > 0 && (
+            <View>
+              <Text style={styles.lg_sectionHeader}>Skills</Text>
+              <Text style={styles.lg_skillsText}>{skills.join(", ")}</Text>
+            </View>
+          )}
+        </View>
       </View>
     </Page>
   </Document>

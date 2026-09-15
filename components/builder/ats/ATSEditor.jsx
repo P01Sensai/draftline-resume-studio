@@ -1,8 +1,39 @@
-import React, { useState } from 'react';
-import { Target, Sparkles } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Target, Sparkles, Upload } from 'lucide-react';
 
 export default function ATSEditor({ onAnalyze, isAnalyzing }) {
   const [jd, setJd] = useState('');
+  const [isExtracting, setIsExtracting] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsExtracting(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/ai/extract-text', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      
+      if (data.success && data.text) {
+        setJd(data.text);
+      } else {
+        alert(data.error || 'Failed to extract text from PDF');
+      }
+    } catch (error) {
+      console.error('Extract Error:', error);
+      alert('An error occurred while reading the PDF');
+    } finally {
+      setIsExtracting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-[#1a1b26] text-gray-900 dark:text-gray-100 p-6 lg:p-10 transition-colors">
@@ -17,7 +48,28 @@ export default function ATSEditor({ onAnalyze, isAnalyzing }) {
       </div>
 
       <div className="flex-1 flex flex-col min-h-[400px]">
-        <label className="text-sm font-semibold mb-2 block uppercase tracking-wider text-gray-400">Job Description</label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-semibold uppercase tracking-wider text-gray-400">Job Description</label>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isExtracting}
+            className="flex items-center gap-1.5 text-xs font-medium text-[#0066FF] hover:text-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {isExtracting ? (
+              <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            ) : (
+              <Upload size={14} />
+            )}
+            Upload PDF
+          </button>
+          <input 
+            type="file" 
+            accept=".pdf" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+            className="hidden" 
+          />
+        </div>
         <textarea
           value={jd}
           onChange={(e) => setJd(e.target.value)}

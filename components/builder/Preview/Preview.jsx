@@ -10,16 +10,16 @@ const Preview = forwardRef(({ activeDoc, template }, ref) => {
 
   if (!resume) return null;
 
-  const { personal, summary, experience, education, skills, coverLetter } = resume;
+  const { personal, summary, experience, education, projects = [], certificates = [], skills, coverLetter } = resume;
 
   return (
     <div className="flex justify-center h-full items-start pt-8 lg:pt-0 lg:sticky lg:top-24">
       <div ref={ref} className="print-paper border border-gray-200 dark:border-gray-800 shadow-xl bg-white w-full max-w-[640px] min-h-[880px] px-10 py-10 transition-all duration-300">
         {activeDoc === "resume" ? (
           template === "typewriter" ? (
-            <TypewriterResume personal={personal} summary={summary} experience={experience} education={education} skills={skills} />
+            <TypewriterResume personal={personal} summary={summary} experience={experience} education={education} projects={projects} certificates={certificates} skills={skills} />
           ) : (
-            <LedgerResume personal={personal} summary={summary} experience={experience} education={education} skills={skills} />
+            <LedgerResume personal={personal} summary={summary} experience={experience} education={education} projects={projects} certificates={certificates} skills={skills} />
           )
         ) : (
           <CoverLetterPreview personal={personal} cover={coverLetter} />

@@ -12,7 +12,7 @@ export function ContactLine({ personal }) {
   );
 }
 
-export function TypewriterResume({ personal, summary, experience, education, skills }) {
+export function TypewriterResume({ personal, summary, experience, education, projects = [], certificates = [], skills }) {
   return (
     <div className="text-black font-type">
       <h1 className="text-[26px] leading-tight font-bold uppercase tracking-tight">{personal.name}</h1>
@@ -36,11 +36,34 @@ export function TypewriterResume({ personal, summary, experience, education, ski
         </div>
       ))}
 
+      {projects.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 mt-4 border-b border-black pb-1">Projects</h2>}
+      {projects.map((proj) => (
+        <div key={proj.id} className="mb-4">
+          <div className="flex justify-between items-baseline">
+            <span className="text-[13.5px] font-bold">{proj.name || "Project Name"} {proj.link && <span className="font-normal">— {proj.link}</span>}</span>
+          </div>
+          {proj.description && <p className="text-[12px] font-mono mt-1 mb-1">{proj.description}</p>}
+          <ul className="mt-1 space-y-1">
+            {proj.bullets.filter(Boolean).map((b, i) => (
+              <li key={i} className="text-[12px] font-mono pl-3 relative before:content-['*'] before:absolute before:left-0">{b}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
       {education.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 mt-4 border-b border-black pb-1">Education</h2>}
       {education.map((ed) => (
         <div key={ed.id} className="flex justify-between items-baseline mb-1.5 text-[12.5px]">
           <span>{ed.degree || "Degree"} — {ed.school || "School"}</span>
           <span className="text-[10.5px] font-mono">{ed.start} – {ed.end}</span>
+        </div>
+      ))}
+
+      {certificates.length > 0 && <h2 className="text-[11px] tracking-[0.2em] uppercase font-bold font-mono mb-2 mt-4 border-b border-black pb-1">Certificates</h2>}
+      {certificates.map((cert) => (
+        <div key={cert.id} className="flex justify-between items-baseline mb-1.5 text-[12.5px]">
+          <span>{cert.name || "Certificate"} — {cert.issuer || "Issuer"}</span>
+          <span className="text-[10.5px] font-mono">{cert.date}</span>
         </div>
       ))}
 
@@ -50,7 +73,7 @@ export function TypewriterResume({ personal, summary, experience, education, ski
   );
 }
 
-export function LedgerResume({ personal, summary, experience, education, skills }) {
+export function LedgerResume({ personal, summary, experience, education, projects = [], certificates = [], skills }) {
   return (
     <div className="text-black font-mono">
       <div className="flex justify-between items-end border-b-2 border-black pb-2 mb-4">
@@ -99,6 +122,40 @@ export function LedgerResume({ personal, summary, experience, education, skills 
         </table>
       )}
 
+      {projects.length > 0 && (
+        <table className="w-full text-[12px] mb-4 border-collapse">
+          <thead>
+            <tr className="border-b border-black">
+              <th className="text-left py-1 font-bold uppercase text-[10px] tracking-wider w-[40%]">Project</th>
+              <th className="text-left py-1 font-bold uppercase text-[10px] tracking-wider">Description</th>
+              <th className="text-right py-1 font-bold uppercase text-[10px] tracking-wider w-[25%]">Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            {projects.map((proj) => (
+              <React.Fragment key={proj.id}>
+                <tr className="border-b border-black/20">
+                  <td className="py-1.5 font-bold align-top">{proj.name || "Project Name"}</td>
+                  <td className="py-1.5 align-top">{proj.description}</td>
+                  <td className="py-1.5 text-right align-top break-all">{proj.link}</td>
+                </tr>
+                {proj.bullets.length > 0 && proj.bullets.some(Boolean) && (
+                  <tr className="border-b border-black/20">
+                    <td colSpan={3} className="pb-2">
+                      <ul>
+                        {proj.bullets.filter(Boolean).map((b, i) => (
+                          <li key={i} className="pl-3 relative before:content-['—'] before:absolute before:left-0">{b}</li>
+                        ))}
+                      </ul>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         {education.length > 0 && (
           <div>
@@ -111,12 +168,27 @@ export function LedgerResume({ personal, summary, experience, education, skills 
             ))}
           </div>
         )}
-        {skills.length > 0 && (
-          <div>
-            <div className="font-bold uppercase text-[10px] tracking-wider border-b border-black mb-1 pb-1">Skills</div>
-            <div className="text-[12px]">{skills.join(", ")}</div>
-          </div>
-        )}
+        
+        <div>
+          {certificates.length > 0 && (
+            <div className="mb-3">
+              <div className="font-bold uppercase text-[10px] tracking-wider border-b border-black mb-1 pb-1">Certificates</div>
+              {certificates.map((cert) => (
+                <div key={cert.id} className="text-[12px] mb-1">
+                  <div className="font-bold">{cert.name || "Certificate"}</div>
+                  <div>{cert.issuer || "Issuer"} · {cert.date}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {skills.length > 0 && (
+            <div>
+              <div className="font-bold uppercase text-[10px] tracking-wider border-b border-black mb-1 pb-1">Skills</div>
+              <div className="text-[12px]">{skills.join(", ")}</div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
