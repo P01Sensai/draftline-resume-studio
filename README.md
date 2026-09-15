@@ -1,94 +1,71 @@
-# Draftline — Resume & Cover Letter Builder
+# Draftline — AI Resume Studio
 
-A free, no-sign-up resume and cover letter builder with a live paper preview.
-Built with Next.js (App Router) for real server-rendered SEO — the landing
-page and the builder each have their own crawlable URL (`/` and `/builder`).
+> 🚧 **Work in Progress:** This project is currently in active development. Features and UI are subject to change.
 
-## What's included
 
-- **`/` — Landing page**: animated glass hero, cursor-reactive floating
-  letters, rotating headline word, scrolling ticker, minimal feature list.
-- **`/builder` — Resume & cover letter builder**: retro black-and-white
-  editor with a live side-by-side paper preview, two templates
-  (Typewriter / Ledger), and a "What's next" panel listing roadmap features
-  that aren't built yet.
-- SEO: per-page `metadata` (title/description/canonical/OpenGraph),
-  `sitemap.xml`, `robots.txt`, and JSON-LD structured data on the landing
-  page — all generated natively by Next.js, no extra packages.
-- PDF export uses the browser's native print dialog (`window.print()`) with
-  print-only CSS — zero dependencies, works everywhere. If you want a
-  polished, code-generated PDF later (custom fonts, exact pixel layout),
-  that's a good next feature to add with a library like `@react-pdf/renderer`.
+Draftline is a professional, modern, and intelligent web application designed to help job seekers build ATS-optimized resumes and cover letters. 
 
-## Run it locally
+Powered by Next.js, Supabase, and Google Gemini AI, Draftline goes beyond basic formatting by actively analyzing your resume against target job descriptions and generating highly-tailored, impact-driven bullet points.
+
+## 🌟 Key Features
+
+- **Intelligent ATS Matcher:** Paste a job description and Draftline will analyze your current resume to provide a match score, missing keywords, and contextual suggestions.
+- **AI-Powered Enhancements:** Use the integrated AI engine to instantly rewrite weak bullet points into strong, action-oriented achievements.
+- **Side-by-Side Live Preview:** A split-screen interface (built with Tailwind CSS and Framer Motion) allows you to edit data on the left while instantly previewing the professional, print-ready document on the right.
+- **Secure Cloud Sync:** Powered by Supabase, user accounts are securely authenticated (Google OAuth & Email/Password) and data is instantly synced to the cloud.
+- **Flawless PDF Export:** Export pixel-perfect, highly customized PDF documents directly from the browser.
+- **Premium UI/UX:** Features a state-of-the-art "Stitch" design system including dynamic glassmorphism, 3D interactive elements, and buttery-smooth CSS transitions.
+
+## 🛠️ Technology Stack
+
+- **Framework:** Next.js (App Router)
+- **Styling:** Tailwind CSS + Framer Motion
+- **Authentication & Database:** Supabase (PostgreSQL + Auth)
+- **AI Engine:** Google Gemini Pro API (`@google/genai`)
+- **PDF Generation:** `@react-pdf/renderer`
+
+## 🚀 Run it Locally
 
 You'll need [Node.js](https://nodejs.org) 18.17 or newer installed.
 
-```bash
-# 1. Unzip the project, then from inside the folder:
-npm install
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-# 2. Start the dev server
-npm run dev
+2. **Set up Environment Variables:**
+   Create a `.env.local` file in the root directory and add your API keys:
+   ```env
+   # Supabase Configuration
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# 3. Open http://localhost:3000
-```
+   # Google Gemini AI Configuration
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
 
-Edit files under `app/` and `components/` — the dev server hot-reloads.
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
 
-## Before you deploy
+4. **Open in browser:**
+   Navigate to [http://localhost:3000](http://localhost:3000).
 
-Replace the placeholder domain in these two files with your real domain
-once you have one (used for canonical URLs, sitemap, and Open Graph tags):
+## 🌍 Deployment
 
-- `app/layout.js` — `SITE_URL`
-- `app/sitemap.js` — `SITE_URL`
-- `app/robots.js` — `SITE_URL`
+This project is fully optimized for zero-config deployment on [Vercel](https://vercel.com).
 
-## Deploy to Vercel (free)
+1. Push your code to a GitHub repository.
+2. Import the project into Vercel.
+3. **CRITICAL:** Ensure you copy the contents of your `.env.local` file into the Vercel **Environment Variables** settings before deploying.
+4. Click **Deploy**.
 
-**Option A — from the Vercel dashboard (no terminal needed):**
+## 🗺️ Roadmap & Next Steps
 
-1. Push this folder to a GitHub repo (create a new repo, then in this
-   folder: `git init && git add . && git commit -m "init" && git branch -M main && git remote add origin <your-repo-url> && git push -u origin main`).
-2. Go to [vercel.com](https://vercel.com), sign in, click **Add New → Project**.
-3. Select your GitHub repo. Vercel auto-detects Next.js — leave the default
-   build settings as-is.
-4. Click **Deploy**. You'll get a live `.vercel.app` URL in about a minute.
-5. Once you have a custom domain, add it under **Project → Settings → Domains**,
-   then update `SITE_URL` in the three files above and redeploy.
-
-**Option B — from the terminal:**
-
-```bash
-npm install -g vercel
-vercel        # first deploy, follow the prompts
-vercel --prod # promote to production
-```
-
-## Project structure
-
-```
-app/
-  layout.js          # fonts + default SEO metadata
-  page.js             # landing page ("/")
-  sitemap.js          # sitemap.xml
-  robots.js           # robots.txt
-  builder/
-    page.js           # builder route metadata, renders BuilderClient
-components/
-  landing/
-    Hero.jsx          # interactive hero (client component)
-    Sections.jsx       # ticker + feature list (server components)
-  builder/
-    BuilderClient.jsx  # the whole editor + preview + templates
-```
-
-## Roadmap (shown in-app under "What's next")
-
-- AI bullet-point rewriting
-- Job description keyword matcher
-- Multiple saved profiles
-- More templates
-- AI-drafted cover letters
-- Account sync across devices
+- [x] Integrate AI bullet-point rewriting
+- [x] Implement Job Description (ATS) matching
+- [x] Integrate cloud account sync via Supabase
+- [ ] Add AI auto-generated Cover Letters
+- [ ] Multiple saved profiles and resume versions
+- [ ] Implement Premium Billing/Paywall
