@@ -4,7 +4,8 @@ import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useStore } from 'zustand';
 import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check, Undo2, Redo2 } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
+import { pdf } from '@react-pdf/renderer';
+import { PDFTypewriterResume, PDFLedgerResume, PDFCoverLetter } from './pdf/PDFTemplates';
 import Editor from './Editor/Editor';
 import Preview from './Preview/Preview';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -19,15 +20,46 @@ export default function WorkspaceLayout() {
 
   const printRef = useRef(null);
   
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: resume?.title ? resume.title.replace(/\s+/g, '_') : 'Resume',
-    onBeforeGetContent: () => {
-      setIsPrinting(true);
-      return new Promise((resolve) => setTimeout(resolve, 50));
-    },
-    onAfterPrint: () => setIsPrinting(false),
-  });
+  const handleExportPDF = async () => {
+    if (!resume) return;
+    setIsPrinting(true);
+    
+    // Give UI a tiny tick to show the "Preparing..." state
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    try {
+      let doc;
+      if (activeDoc === "resume") {
+        if (resume.template === "typewriter" || !resume.template) {
+          doc = <PDFTypewriterResume personal={resume.personal} summary={resume.summary} experience={resume.experience} education={resume.education} skills={resume.skills} />;
+        } else {
+          doc = <PDFLedgerResume personal={resume.personal} summary={resume.summary} experience={resume.experience} education={resume.education} skills={resume.skills} />;
+        }
+      } else {
+        doc = <PDFCoverLetter personal={resume.personal} cover={resume.coverLetter} />;
+      }
+      
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const prefix = activeDoc === "resume" ? "Resume" : "CoverLetter";
+      const fileName = resume.title ? resume.title.replace(/\s+/g, '_') : prefix;
+      link.download = `${fileName}.pdf`;
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      alert("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsPrinting(false);
+    }
+  };
 
   if (!resume) return <div className="p-8">Loading workspace...</div>;
 
@@ -129,7 +161,7 @@ export default function WorkspaceLayout() {
             </button>
             
             <button
-              onClick={handlePrint}
+              onClick={handleExportPDF}
               disabled={isPrinting}
               className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#0066FF] text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-wait"
             >
