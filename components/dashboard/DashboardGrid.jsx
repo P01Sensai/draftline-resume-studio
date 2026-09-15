@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut } from 'lucide-react';
+import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BentoCard from './BentoCard';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -29,6 +29,7 @@ export default function DashboardGrid() {
   const setActiveResume = useResumeStore((state) => state.setActiveResume);
   const createResume = useResumeStore((state) => state.createResume);
   const createBlankResume = useResumeStore((state) => state.createBlankResume);
+  const importResume = useResumeStore((state) => state.importResume);
   const deleteResume = useResumeStore((state) => state.deleteResume);
   const theme = useResumeStore((state) => state.theme);
   const toggleTheme = useResumeStore((state) => state.toggleTheme);
@@ -36,6 +37,8 @@ export default function DashboardGrid() {
   const supabase = createClient();
 
   const containerRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [isParsing, setIsParsing] = useState(false);
   const [pos, onMove] = useMousePct(containerRef);
 
   const activityData = React.useMemo(() => {
@@ -72,6 +75,41 @@ export default function DashboardGrid() {
   const handleCreateBlank = () => {
     createBlankResume();
     router.push('/builder');
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsParsing(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/ai/parse-resume', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        importResume(data.data);
+        router.push('/builder');
+      } else {
+        alert(data.error || 'Failed to parse resume');
+      }
+    } catch (error) {
+      console.error('Upload Error:', error);
+      alert('An error occurred while uploading');
+    } finally {
+      setIsParsing(false);
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleCreateExample = () => {
@@ -174,6 +212,26 @@ export default function DashboardGrid() {
               <Plus size={18} />
               Blank Canvas
             </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={handleImportClick}
+              disabled={isParsing}
+              className="bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 px-5 py-2.5 rounded-full font-medium flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isParsing ? (
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              ) : (
+                <Upload size={18} />
+              )}
+              {isParsing ? "Parsing..." : "Import PDF"}
+            </motion.button>
+            <input 
+              type="file" 
+              accept=".pdf" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleFileChange}
+            />
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleCreateExample}

@@ -97,6 +97,19 @@ export const useResumeStore = create(
           activeResumeId: newResume.id
         }));
       },
+      importResume: (parsedData) => {
+        const newResume = { 
+          ...blankResume, 
+          id: generateId(),
+          title: `${parsedData.personal?.name || 'Imported'} Resume`,
+          ...parsedData,
+          updatedAt: new Date().toISOString() 
+        };
+        set((state) => ({
+          resumes: [...state.resumes, newResume],
+          activeResumeId: newResume.id
+        }));
+      },
       deleteResume: (id) => set((state) => {
         const remaining = state.resumes.filter(r => r.id !== id);
         return {

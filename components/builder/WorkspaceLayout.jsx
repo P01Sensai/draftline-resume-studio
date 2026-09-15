@@ -3,17 +3,22 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useStore } from 'zustand';
-import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check, Undo2, Redo2, Share2 } from 'lucide-react';
+import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check, Undo2, Redo2, Share2, Target } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
 import { PDFTypewriterResume, PDFLedgerResume, PDFCoverLetter } from './pdf/PDFTemplates';
 import Editor from './Editor/Editor';
 import Preview from './Preview/Preview';
+import ATSEditor from './ats/ATSEditor';
+import ATSResults from './ats/ATSResults';
 import { useResumeStore } from '@/store/useResumeStore';
 
 export default function WorkspaceLayout() {
-  const [activeDoc, setActiveDoc] = useState("resume");
+  const [activeDoc, setActiveDoc] = useState("resume"); // resume | cover | ats
   const [isPrinting, setIsPrinting] = useState(false);
-  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved
+  const [saveStatus, setSaveStatus] = useState("idle");
+  const [atsResults, setAtsResults] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
   const { resumes, activeResumeId, updateActiveResume, theme, toggleTheme } = useResumeStore();
   const { undo, redo, pastStates, futureStates } = useStore(useResumeStore.temporal, (state) => state);
   const resume = resumes.find(r => r.id === activeResumeId);
@@ -104,6 +109,31 @@ export default function WorkspaceLayout() {
     setTimeout(() => setSaveStatus("idle"), 2500);
   };
 
+  const handleAnalyzeATS = async (jobDescription) => {
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch('/api/ai/ats-match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobDescription,
+          resumeData: JSON.stringify(resume)
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAtsResults(data.data);
+      } else {
+        alert("Failed to analyze resume: " + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred during analysis.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 font-body flex flex-col transition-colors">
       {/* Top Navigation Bar - Clean and Minimal */}
@@ -126,6 +156,12 @@ export default function WorkspaceLayout() {
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeDoc === "cover" ? "bg-white dark:bg-[#1a1b26] text-gray-900 dark:text-gray-100 shadow-sm border border-transparent dark:border-gray-700" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"}`}
               >
                 <Mail size={14} /> Cover Letter
+              </button>
+              <button
+                onClick={() => setActiveDoc("ats")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${activeDoc === "ats" ? "bg-white dark:bg-[#1a1b26] text-[#0066FF] shadow-sm border border-transparent dark:border-gray-700" : "text-gray-500 dark:text-gray-400 hover:text-[#0066FF]"}`}
+              >
+                <Target size={14} /> ATS Match
               </button>
             </div>
           </div>
@@ -225,12 +261,20 @@ export default function WorkspaceLayout() {
       <div className="flex-1 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-0 lg:gap-8 bg-[#f8f9fc] dark:bg-[#0a0b14] transition-colors">
         {/* Editor Side */}
         <div className="no-print bg-white dark:bg-[#1a1b26] border-r border-gray-200 dark:border-gray-800 overflow-y-auto transition-colors custom-scrollbar" style={{ height: 'calc(100vh - 61px)' }}>
-          <Editor activeDoc={activeDoc} />
+          {activeDoc === "ats" ? (
+            <ATSEditor onAnalyze={handleAnalyzeATS} isAnalyzing={isAnalyzing} />
+          ) : (
+            <Editor activeDoc={activeDoc} />
+          )}
         </div>
 
         {/* Preview Side */}
         <div className="bg-[#f8f9fc] dark:bg-[#0a0b14] overflow-y-auto p-4 lg:p-8 custom-scrollbar transition-colors" style={{ height: 'calc(100vh - 61px)' }}>
-          <Preview ref={printRef} activeDoc={activeDoc} template={resume.template || 'typewriter'} />
+          {activeDoc === "ats" ? (
+            <ATSResults results={atsResults} />
+          ) : (
+            <Preview ref={printRef} activeDoc={activeDoc} template={resume.template || 'typewriter'} />
+          )}
         </div>
       </div>
     </div>
