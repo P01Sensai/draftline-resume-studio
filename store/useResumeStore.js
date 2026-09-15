@@ -75,6 +75,7 @@ export const useResumeStore = create(
       user: null,
       setUser: (user) => set({ user }),
       theme: 'light',
+      setTheme: (theme) => set({ theme }),
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
       resumes: [defaultResume],
       activeResumeId: defaultResume.id,

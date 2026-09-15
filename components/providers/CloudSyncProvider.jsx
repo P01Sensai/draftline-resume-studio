@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { useResumeStore, defaultResume } from '@/store/useResumeStore';
@@ -8,7 +8,7 @@ import { useResumeStore, defaultResume } from '@/store/useResumeStore';
 export default function CloudSyncProvider({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   
   const resumes = useResumeStore((state) => state.resumes);
   const activeResumeId = useResumeStore((state) => state.activeResumeId);
