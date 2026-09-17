@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut, Upload, Grid, List, Clock, ArrowDownAZ, Trash2 } from 'lucide-react';
+import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut, Upload, Grid, List, Clock, ArrowDownAZ, Trash2, Mail, ScanLine } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BentoCard from './BentoCard';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -127,6 +127,16 @@ export default function DashboardGrid() {
   const handleCreateExample = () => {
     createResume();
     router.push('/builder');
+  };
+
+  const handleCreateCoverLetter = () => {
+    createBlankResume();
+    router.push('/builder?tab=cover');
+  };
+
+  const handleCreateATS = () => {
+    createBlankResume();
+    router.push('/builder?tab=ats');
   };
 
   const handleOpenResume = (id) => {
@@ -483,6 +493,47 @@ export default function DashboardGrid() {
                  }
                })}
             </div>
+          </BentoCard>
+          
+          {/* Cover Letters - 4 columns */}
+          <BentoCard variants={itemVariants} onClick={handleCreateCoverLetter} className="md:col-span-6 lg:col-span-4 flex flex-col justify-between bg-gradient-to-br from-[#f8faff] dark:from-[#0f111a] to-white dark:to-[#1a1b26] border-blue-100/50 dark:border-gray-800/60 shadow-[0_4px_20px_rgba(0,102,255,0.03)] dark:shadow-none p-6 group cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/50 transition-all">
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 shadow-sm flex items-center justify-center mb-4 text-[#0066FF] dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 group-hover:scale-110 transition-transform duration-300">
+                <Mail size={22} />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-1">Cover Letters</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Generate targeted cover letters instantly using AI.</p>
+            </div>
+            <button className="mt-6 w-full py-2.5 rounded-lg bg-white dark:bg-[#151621] border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:hover:bg-[#1a1b26] transition-colors shadow-sm flex items-center justify-center gap-2">
+              <Sparkles size={16} className="text-[#0066FF] dark:text-blue-400" />
+              Generate New
+            </button>
+          </BentoCard>
+
+          {/* ATS Matcher - 4 columns */}
+          <BentoCard variants={itemVariants} onClick={handleCreateATS} className="md:col-span-6 lg:col-span-4 flex flex-col justify-between bg-gradient-to-br from-[#f8faff] dark:from-[#0f111a] to-white dark:to-[#1a1b26] border-blue-100/50 dark:border-gray-800/60 shadow-[0_4px_20px_rgba(0,102,255,0.03)] dark:shadow-none p-6 group cursor-pointer hover:border-blue-300 dark:hover:border-blue-500/50 transition-all">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 shadow-sm flex items-center justify-center mb-4 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/50 group-hover:scale-110 transition-transform duration-300">
+                  <ScanLine size={22} />
+                </div>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-1">ATS Scanner</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Analyze resume against job descriptions.</p>
+              </div>
+              
+              {/* Decorative Radar/Scan Visual */}
+              <div className="relative w-16 h-16 shrink-0 mt-2">
+                <div className="absolute inset-0 rounded-full border-2 border-indigo-100 dark:border-indigo-900/50 border-dashed animate-[spin_10s_linear_infinite]"></div>
+                <div className="absolute inset-2 rounded-full border-2 border-indigo-200 dark:border-indigo-800/60 border-dotted animate-[spin_15s_linear_infinite_reverse]"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Target size={16} className="text-indigo-600 dark:text-indigo-400" />
+                </div>
+              </div>
+            </div>
+            
+            <button className="mt-6 w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm transition-colors shadow-sm shadow-indigo-500/20">
+              Run Scan
+            </button>
           </BentoCard>
 
         </div>

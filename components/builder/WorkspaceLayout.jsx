@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useStore } from 'zustand';
 import { ArrowLeft, FileText, Mail, Download, Moon, Sun, Save, Check, Undo2, Redo2, Share2, Target } from 'lucide-react';
@@ -23,6 +23,18 @@ export default function WorkspaceLayout() {
   const resume = resumes.find(r => r.id === activeResumeId);
 
   const printRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab === 'cover' || tab === 'ats') {
+        setActiveDoc(tab);
+        // Clear the URL parameter so it doesn't persist on reload
+        window.history.replaceState({}, '', '/builder');
+      }
+    }
+  }, []);
   
   const generatePDFBlob = async () => {
     if (!resume) return null;
