@@ -124,7 +124,7 @@ export default function Editor({ activeDoc, setActiveDoc }) {
 
     const toastId = toast.loading("Uploading and parsing your PDF...");
     const formData = new FormData();
-    formData.append('pdf', file);
+    formData.append('file', file);
 
     try {
       // 1. Parse PDF

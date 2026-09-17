@@ -2,7 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut, Upload } from 'lucide-react';
+import { FileText, Plus, Target, Sparkles, TrendingUp, Moon, Sun, LogOut, Upload, Grid, List, Clock, ArrowDownAZ, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BentoCard from './BentoCard';
 import { useResumeStore } from '@/store/useResumeStore';
@@ -41,6 +41,17 @@ export default function DashboardGrid() {
   const fileInputRef = useRef(null);
   const [isParsing, setIsParsing] = useState(false);
   const [pos, onMove] = useMousePct(containerRef);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [sortOrder, setSortOrder] = useState('recent'); // 'recent' | 'alpha'
+
+  const sortedResumes = React.useMemo(() => {
+    const list = [...resumes];
+    if (sortOrder === 'alpha') {
+      return list.sort((a, b) => (a.title || 'Untitled').localeCompare(b.title || 'Untitled'));
+    }
+    // Default to recent (by updatedAt)
+    return list.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  }, [resumes, sortOrder]);
 
   const activityData = React.useMemo(() => {
     const today = new Date();
@@ -168,8 +179,59 @@ export default function DashboardGrid() {
       <div className="relative z-10 max-w-6xl mx-auto">
         <header className="mb-10 flex items-center justify-between">
           <div>
-            <motion.h1 variants={itemVariants} className="text-3xl font-bold tracking-tight mb-2">My Workspace</motion.h1>
-            <motion.p variants={itemVariants} className="text-gray-500 dark:text-gray-400">Manage your resumes and cover letters.</motion.p>
+            {user ? (
+              <>
+                <motion.h1 variants={itemVariants} className="text-3xl font-bold tracking-tight mb-2">My Workspace</motion.h1>
+                <motion.p variants={itemVariants} className="text-gray-500 dark:text-gray-400">Manage your resumes and cover letters.</motion.p>
+              </>
+            ) : (
+              <motion.div variants={itemVariants} className="flex items-center gap-3">
+                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-11 h-11 drop-shadow-sm">
+                  <defs>
+                    <linearGradient id="bg-grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#EFF6FF"/>
+                      <stop offset="50%" stopColor="#EEF2FF"/>
+                      <stop offset="100%" stopColor="#E0E7FF"/>
+                    </linearGradient>
+                    <linearGradient id="stroke-grad" x1="8" y1="10" x2="32" y2="30" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#4F46E5"/>
+                      <stop offset="60%" stopColor="#6366F1"/>
+                      <stop offset="100%" stopColor="#38BDF8"/>
+                    </linearGradient>
+                    <linearGradient id="accent-grad" x1="16" y1="28" x2="30" y2="28" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#38BDF8"/>
+                      <stop offset="100%" stopColor="#818CF8"/>
+                    </linearGradient>
+                    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%" filterUnits="userSpaceOnUse">
+                      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+                      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                    </filter>
+                    <linearGradient id="inner-glow-border" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9"/>
+                      <stop offset="100%" stopColor="#C7D2FE" stopOpacity="0.4"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="40" height="40" rx="12" fill="url(#bg-grad)"/>
+                  <rect x="0.5" y="0.5" width="39" height="39" rx="11.5" stroke="url(#inner-glow-border)" strokeWidth="1"/>
+                  <g filter="url(#soft-glow)" opacity="0.15">
+                    <path d="M12 14C12 13.4477 12.4477 13 13 13H23C26.866 13 30 16.134 30 20C30 23.866 26.866 27 23 27H16" stroke="#4F46E5" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 13V28" stroke="#4F46E5" strokeWidth="3.2" strokeLinecap="round"/>
+                  </g>
+                  <path d="M12 14C12 13.4477 12.4477 13 13 13H23C26.866 13 30 16.134 30 20C30 23.866 26.866 27 23 27H16" stroke="url(#stroke-grad)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 13V28" stroke="url(#stroke-grad)" strokeWidth="3" strokeLinecap="round"/>
+                  <path d="M12.5 20H21C21.8284 20 22.5 19.3284 22.5 18.5C22.5 17.6716 21.8284 17 21 17H12.5" stroke="url(#stroke-grad)" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
+                  <rect x="17" y="27" width="12" height="3" rx="1.5" fill="url(#accent-grad)"/>
+                </svg>
+                <div className="flex flex-col">
+                  <span className="text-2xl tracking-tight text-gray-900 dark:text-white font-bold flex items-center gap-2">
+                    Draftline
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-none">
+                    AI Resume Studio
+                  </span>
+                </div>
+              </motion.div>
+            )}
           </div>
           <motion.div variants={itemVariants} className="flex items-center gap-3">
             <motion.button
@@ -248,12 +310,32 @@ export default function DashboardGrid() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[minmax(180px,_auto)]">
           
           {/* Main Resumes List - takes up 8 columns */}
-          <BentoCard variants={itemVariants} className="md:col-span-8 md:row-span-2 flex flex-col bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
+          <BentoCard variants={itemVariants} className="md:col-span-8 md:row-span-2 flex flex-col bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-sm border-gray-100 dark:border-gray-800/50 h-[500px]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                 <FileText size={20} className="text-[#0066FF]" />
                 Recent Resumes
               </h2>
+              {resumes.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-gray-100 dark:bg-[#0f111a] rounded-lg p-1 border border-gray-200 dark:border-gray-800">
+                    <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-[#1a1b26] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`} title="Grid View">
+                      <Grid size={16} />
+                    </button>
+                    <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-[#1a1b26] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`} title="List View">
+                      <List size={16} />
+                    </button>
+                  </div>
+                  <div className="flex items-center bg-gray-100 dark:bg-[#0f111a] rounded-lg p-1 border border-gray-200 dark:border-gray-800">
+                    <button onClick={() => setSortOrder('recent')} className={`p-1.5 rounded-md transition-colors ${sortOrder === 'recent' ? 'bg-white dark:bg-[#1a1b26] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`} title="Sort by Recent">
+                      <Clock size={16} />
+                    </button>
+                    <button onClick={() => setSortOrder('alpha')} className={`p-1.5 rounded-md transition-colors ${sortOrder === 'alpha' ? 'bg-white dark:bg-[#1a1b26] text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`} title="Sort Alphabetically">
+                      <ArrowDownAZ size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             {isCloudSyncing ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start">
@@ -281,39 +363,65 @@ export default function DashboardGrid() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start">
-                {resumes.map(resume => (
-                  <motion.div 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    key={resume.id} 
-                    className="group relative border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 hover:border-[#0066FF] dark:hover:border-[#0066FF] transition-all cursor-pointer bg-white dark:bg-[#1a1b26] shadow-sm hover:shadow-md" 
-                    onClick={() => handleOpenResume(resume.id)}
-                    onMouseEnter={() => router.prefetch('/builder')}
-                  >
-                    <div className="aspect-[1/1.4] w-full bg-gray-50 dark:bg-[#0f111a] border border-gray-100 dark:border-gray-800/50 rounded-lg mb-4 p-2 overflow-hidden flex flex-col text-[4px] relative">
-                       <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-[#1a1b26]/90 to-transparent z-10"></div>
-                       <div className="font-bold mb-1 text-black dark:text-gray-300">{resume.personal?.name || "Name"}</div>
-                       <div className="h-[1px] bg-gray-200 dark:bg-gray-700 mb-2 w-full"></div>
-                       <div className="h-1 bg-gray-200 dark:bg-gray-700 w-full mb-1"></div>
-                       <div className="h-1 bg-gray-200 dark:bg-gray-700 w-3/4 mb-1"></div>
-                       <div className="h-1 bg-gray-200 dark:bg-gray-700 w-5/6 mb-1"></div>
-                    </div>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-sm truncate w-32 text-gray-900 dark:text-gray-100">{resume.title || 'Untitled'}</h3>
-                        <p className="text-xs text-gray-400 mt-1">Edited {new Date(resume.updatedAt).toLocaleDateString()}</p>
-                      </div>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); deleteResume(resume.id); }}
-                        className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-1 bg-red-50 dark:bg-red-500/10 rounded-md"
-                        title="Delete resume"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 min-h-0">
+                <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4" : "flex flex-col gap-3 pb-4"}>
+                  {sortedResumes.map(resume => (
+                    <motion.div 
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      key={resume.id} 
+                      className={`group relative border border-gray-200 dark:border-gray-800/80 rounded-2xl hover:border-[#0066FF] dark:hover:border-[#0066FF] transition-all cursor-pointer bg-white dark:bg-[#1a1b26] shadow-sm hover:shadow-md overflow-hidden ${viewMode === 'list' ? 'flex flex-row items-center p-3 gap-4' : 'flex flex-col p-4'}`}
+                      onClick={() => handleOpenResume(resume.id)}
+                      onMouseEnter={() => router.prefetch('/builder')}
+                    >
+                      {viewMode === 'grid' ? (
+                        <>
+                          <div className="aspect-[1/1.4] w-full bg-gray-50 dark:bg-[#0f111a] border border-gray-100 dark:border-gray-800/50 rounded-lg mb-4 p-2 overflow-hidden flex flex-col text-[4px] relative shrink-0">
+                             <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-[#1a1b26]/90 to-transparent z-10"></div>
+                             <div className="font-bold mb-1 text-black dark:text-gray-300">{resume.personal?.name || "Name"}</div>
+                             <div className="h-[1px] bg-gray-200 dark:bg-gray-700 mb-2 w-full"></div>
+                             <div className="h-1 bg-gray-200 dark:bg-gray-700 w-full mb-1"></div>
+                             <div className="h-1 bg-gray-200 dark:bg-gray-700 w-3/4 mb-1"></div>
+                             <div className="h-1 bg-gray-200 dark:bg-gray-700 w-5/6 mb-1"></div>
+                          </div>
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="font-medium text-sm truncate w-32 text-gray-900 dark:text-gray-100">{resume.title || 'Untitled'}</h3>
+                              <p className="text-xs text-gray-400 mt-1">Edited {new Date(resume.updatedAt).toLocaleDateString()}</p>
+                            </div>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); deleteResume(resume.id); }}
+                              className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-1.5 bg-red-50 dark:bg-red-500/10 rounded-md shrink-0"
+                              title="Delete resume"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-10 h-14 bg-gray-100 dark:bg-gray-800 rounded flex flex-col p-1 text-[2px] shrink-0 border border-gray-200 dark:border-gray-700">
+                             <div className="font-bold mb-0.5 text-gray-400">{resume.personal?.name?.charAt(0) || "N"}</div>
+                             <div className="h-[0.5px] bg-gray-300 dark:bg-gray-600 mb-1 w-full"></div>
+                             <div className="h-0.5 bg-gray-300 dark:bg-gray-600 w-full mb-0.5"></div>
+                             <div className="h-0.5 bg-gray-300 dark:bg-gray-600 w-3/4 mb-0.5"></div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">{resume.title || 'Untitled'}</h3>
+                            <p className="text-xs text-gray-400 mt-0.5">Edited {new Date(resume.updatedAt).toLocaleDateString()}</p>
+                          </div>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); deleteResume(resume.id); }}
+                            className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-2 bg-red-50 dark:bg-red-500/10 rounded-md shrink-0 mr-1"
+                            title="Delete resume"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             )}
           </BentoCard>
