@@ -45,15 +45,22 @@ export const metadata = {
   },
 };
 
+import { Toaster } from 'sonner';
+import NetworkStatus from '@/components/ui/NetworkStatus';
+import GlobalModals from '@/components/ui/GlobalModals';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${courierPrime.variable} ${plexMono.variable}`}>
       <body className="font-body antialiased bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 transition-colors">
+        <NetworkStatus />
+        <GlobalModals />
         <ThemeProvider>
           <CloudSyncProvider>
             {children}
           </CloudSyncProvider>
         </ThemeProvider>
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );

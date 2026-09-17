@@ -1,15 +1,24 @@
 import React from 'react';
 
-export function MinimalField({ label, ...props }) {
+export function MinimalField({ label, error, ...props }) {
   return (
-    <label className="block mb-4">
-      <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+    <label className="block mb-4 relative">
+      <span className={`block text-xs font-medium mb-1.5 ${error ? 'text-red-500 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
         {label}
       </span>
       <input
         {...props}
-        className="w-full bg-transparent border-b border-gray-200 dark:border-gray-700 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-[#0066FF] transition-colors placeholder:text-gray-300 dark:placeholder:text-gray-600"
+        className={`w-full bg-transparent border-b py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition-colors placeholder:text-gray-300 dark:placeholder:text-gray-600 ${
+          error 
+            ? 'border-red-500 focus:border-red-600 dark:border-red-500/50 dark:focus:border-red-400' 
+            : 'border-gray-200 dark:border-gray-700 focus:border-[#0066FF]'
+        }`}
       />
+      {error && (
+        <span className="absolute -bottom-4 left-0 text-[10px] text-red-500 dark:text-red-400 font-medium">
+          {error}
+        </span>
+      )}
     </label>
   );
 }

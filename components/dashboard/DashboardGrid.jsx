@@ -26,6 +26,7 @@ function useMousePct(ref) {
 export default function DashboardGrid() {
   const router = useRouter();
   const resumes = useResumeStore((state) => state.resumes);
+  const isCloudSyncing = useResumeStore((state) => state.isCloudSyncing);
   const setActiveResume = useResumeStore((state) => state.setActiveResume);
   const createResume = useResumeStore((state) => state.createResume);
   const createBlankResume = useResumeStore((state) => state.createBlankResume);
@@ -254,11 +255,30 @@ export default function DashboardGrid() {
                 Recent Resumes
               </h2>
             </div>
-            
-            {resumes.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl p-8 bg-white/50 dark:bg-transparent">
-                <FileText size={48} className="mb-3 opacity-20" />
-                <p>No resumes yet. Create one to get started.</p>
+            {isCloudSyncing ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="border border-gray-200 dark:border-gray-800/80 rounded-2xl p-4 bg-white dark:bg-[#1a1b26] shadow-sm animate-pulse">
+                    <div className="aspect-[1/1.4] w-full bg-gray-100 dark:bg-gray-800/50 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-100 dark:bg-gray-800/60 rounded w-1/2"></div>
+                  </div>
+                ))}
+              </div>
+            ) : resumes.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-800/60 rounded-xl p-8 bg-gray-50/50 dark:bg-[#1a1b26]/30">
+                <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center mb-4">
+                  <FileText size={32} className="text-blue-500 dark:text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No resumes yet</h3>
+                <p className="text-sm max-w-[250px] mb-6">Create a blank resume or import an existing one to get started.</p>
+                <button 
+                  onClick={handleCreateBlank}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm shadow-blue-500/20 flex items-center gap-2"
+                >
+                  <Plus size={18} />
+                  Create your first resume
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start">
@@ -273,7 +293,7 @@ export default function DashboardGrid() {
                   >
                     <div className="aspect-[1/1.4] w-full bg-gray-50 dark:bg-[#0f111a] border border-gray-100 dark:border-gray-800/50 rounded-lg mb-4 p-2 overflow-hidden flex flex-col text-[4px] relative">
                        <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-[#1a1b26]/90 to-transparent z-10"></div>
-                       <div className="font-bold mb-1 text-black dark:text-gray-300">{resume.personal.name || "Name"}</div>
+                       <div className="font-bold mb-1 text-black dark:text-gray-300">{resume.personal?.name || "Name"}</div>
                        <div className="h-[1px] bg-gray-200 dark:bg-gray-700 mb-2 w-full"></div>
                        <div className="h-1 bg-gray-200 dark:bg-gray-700 w-full mb-1"></div>
                        <div className="h-1 bg-gray-200 dark:bg-gray-700 w-3/4 mb-1"></div>

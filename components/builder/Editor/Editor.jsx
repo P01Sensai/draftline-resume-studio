@@ -39,6 +39,7 @@ export default function Editor({ activeDoc }) {
 
   const resume = resumes.find(r => r.id === activeResumeId);
   const [skillInput, setSkillInput] = useState("");
+  const [generatingBulletId, setGeneratingBulletId] = useState(null);
 
   if (!resume) return <div className="p-8 text-gray-500">No active resume.</div>;
 
@@ -66,10 +67,20 @@ export default function Editor({ activeDoc }) {
       {activeDoc === "resume" ? (
         <>
           <MinimalSection title="Personal Details">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-              <MinimalField label="Full name" value={personal.name} onChange={(e) => updatePersonal({ name: e.target.value })} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+              <MinimalField 
+                label="Full name" 
+                value={personal.name} 
+                onChange={(e) => updatePersonal({ name: e.target.value })} 
+                error={!personal.name.trim() ? "Name is required" : ""}
+              />
               <MinimalField label="Title / role" list="titles-list" value={personal.title} onChange={(e) => updatePersonal({ title: e.target.value })} />
-              <MinimalField label="Email" value={personal.email} onChange={(e) => updatePersonal({ email: e.target.value })} />
+              <MinimalField 
+                label="Email" 
+                value={personal.email} 
+                onChange={(e) => updatePersonal({ email: e.target.value })} 
+                error={personal.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personal.email) ? "Invalid email format" : ""}
+              />
               <MinimalField label="Phone" value={personal.phone} onChange={(e) => updatePersonal({ phone: e.target.value })} />
               <MinimalField label="Location" list="locations-list" value={personal.location} onChange={(e) => updatePersonal({ location: e.target.value })} />
               <MinimalField label="Website / portfolio" value={personal.website} onChange={(e) => updatePersonal({ website: e.target.value })} />
@@ -136,7 +147,12 @@ export default function Editor({ activeDoc }) {
                         onChange={(e) => updateBullet(exp.id, i, e.target.value)}
                         placeholder="Led redesign of onboarding, lifting activation 18%"
                         rows={2}
-                        className="flex-1 bg-white dark:bg-[#0a0b14] border border-gray-200 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 outline-none focus:border-[#0066FF] dark:focus:border-[#0066FF] transition-colors resize-y"
+                        disabled={generatingBulletId === `${exp.id}-${i}`}
+                        className={`flex-1 bg-white dark:bg-[#0a0b14] border rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition-all resize-y ${
+                          generatingBulletId === `${exp.id}-${i}`
+                            ? 'border-indigo-400 dark:border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-pulse bg-indigo-50/30 dark:bg-indigo-900/10'
+                            : 'border-gray-200 dark:border-gray-700 focus:border-[#0066FF] dark:focus:border-[#0066FF]'
+                        }`}
                       />
                       <div className="flex flex-col gap-1 mt-1">
                         <AIEnhanceButton 
@@ -144,6 +160,7 @@ export default function Editor({ activeDoc }) {
                           role={exp.role} 
                           company={exp.company} 
                           onEnhance={(newText) => updateBullet(exp.id, i, newText)} 
+                          onLoadingChange={(isLoading) => setGeneratingBulletId(isLoading ? `${exp.id}-${i}` : null)}
                           isLocked={!user}
                         />
                         {exp.bullets.length > 1 && (

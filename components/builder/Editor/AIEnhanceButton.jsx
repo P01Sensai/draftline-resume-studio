@@ -2,9 +2,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, ChevronDown, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useResumeStore } from '@/store/useResumeStore';
+import { toast } from 'sonner';
 
-export default function AIEnhanceButton({ text, role, company, type = 'bullet', onEnhance, isLocked = false }) {
+export default function AIEnhanceButton({ text, role, company, type = 'bullet', onEnhance, onLoadingChange, isLocked = false }) {
+  const setShowPaywall = useResumeStore(state => state.setShowPaywallModal);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Notify parent of loading state changes
+  useEffect(() => {
+    if (onLoadingChange) onLoadingChange(isLoading);
+  }, [isLoading, onLoadingChange]);
   const [tone, setTone] = useState("Action-Oriented");
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -23,8 +31,7 @@ export default function AIEnhanceButton({ text, role, company, type = 'bullet', 
 
   const handleEnhance = async (selectedTone = tone) => {
     if (isLocked) {
-      alert("Sign in to unlock AI features for this section!");
-      router.push('/login');
+      setShowPaywall(true);
       return;
     }
     if (!text || text.trim() === '') return;
@@ -42,13 +49,14 @@ export default function AIEnhanceButton({ text, role, company, type = 'bullet', 
       
       if (data.result) {
         onEnhance(data.result);
+        toast.success("AI Enhancement applied!");
       } else {
         console.error(data.error);
-        alert(data.error || "Failed to enhance");
+        toast.error(data.error || "Failed to enhance text. Please try again.");
       }
     } catch (e) {
       console.error(e);
-      alert("Failed to connect to AI");
+      toast.error("Network error. Failed to connect to AI.");
     } finally {
       setIsLoading(false);
     }

@@ -85,6 +85,13 @@ export const useResumeStore = create(
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
       resumes: [defaultResume],
       activeResumeId: defaultResume.id,
+      isCloudSyncing: true,
+      
+      // Global Modals
+      showPaywallModal: false,
+      setShowPaywallModal: (show) => set({ showPaywallModal: show }),
+      showSessionExpiredModal: false,
+      setShowSessionExpiredModal: (show) => set({ showSessionExpiredModal: show }),
 
       // Dashboard Actions
       setStoreState: (newState) => set(newState),

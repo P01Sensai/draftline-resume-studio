@@ -20,12 +20,16 @@ export default function CloudSyncProvider({ children }) {
 
   useEffect(() => {
     let isMounted = true;
+    const setShowSession = useResumeStore.getState().setShowSessionExpiredModal;
 
     async function initializeCloud() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        if (isMounted) setIsInitializing(false);
+        if (isMounted) {
+          setIsInitializing(false);
+          setStoreState({ isCloudSyncing: false });
+        }
         return;
       }
 
@@ -56,26 +60,36 @@ export default function CloudSyncProvider({ children }) {
         }
       }
       
-      if (isMounted) setIsInitializing(false);
+      if (isMounted) {
+        setIsInitializing(false);
+        setStoreState({ isCloudSyncing: false });
+      }
     }
 
     initializeCloud();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         setIsInitializing(true);
+        setStoreState({ isCloudSyncing: true });
+        setUser(session?.user);
         initializeCloud();
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+        // Only show session expired if we were previously logged in
+        if (useResumeStore.getState().user !== null) {
+          setShowSession(true);
+        }
         setUser(null);
         setStoreState({ resumes: [defaultResume], activeResumeId: defaultResume.id });
         prevResumesRef.current = null;
-        router.push('/login');
+        if (event === 'SIGNED_OUT') router.push('/login');
       }
     });
 
     return () => {
       isMounted = false;
-      authListener.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, [router, supabase, setStoreState, setUser]);
 
