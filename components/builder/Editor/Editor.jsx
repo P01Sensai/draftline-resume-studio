@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Plus, Trash2, X } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Plus, Trash2, X, Sparkles, Upload, FileText } from 'lucide-react';
 import { useResumeStore } from '@/store/useResumeStore';
+import { toast } from 'sonner';
 import { MinimalField, MinimalTextArea, MonthYearPicker } from '../ui/FormFields';
 import { MinimalSection } from '../ui/MinimalSection';
 import AIEnhanceButton from './AIEnhanceButton';
 import { COMMON_SKILLS, COMMON_TITLES, COMMON_LOCATIONS } from '@/lib/suggestions';
 
-export default function Editor({ activeDoc }) {
+export default function Editor({ activeDoc, setActiveDoc }) {
   const {
     resumes,
     activeResumeId,
@@ -40,10 +41,132 @@ export default function Editor({ activeDoc }) {
   const resume = resumes.find(r => r.id === activeResumeId);
   const [skillInput, setSkillInput] = useState("");
   const [generatingBulletId, setGeneratingBulletId] = useState(null);
+  const [isGeneratingCover, setIsGeneratingCover] = useState(false);
+  
+  const fileInputRef = useRef(null);
+  
+  // Cover Letter Modal State
+  const [showCoverModal, setShowCoverModal] = useState(false);
+  const [coverTargetRole, setCoverTargetRole] = useState("");
+  const [coverTargetCompany, setCoverTargetCompany] = useState("");
+
+  const setShowPaywall = useResumeStore(state => state.setShowPaywallModal);
 
   if (!resume) return <div className="p-8 text-gray-500">No active resume.</div>;
 
   const { personal, summary, experience, education, projects = [], certificates = [], skills, coverLetter } = resume;
+
+  const handleAutoGenerateCover = async () => {
+    if (!user) {
+      setShowPaywall(true);
+      return;
+    }
+    
+    if (!coverTargetRole || !coverTargetCompany) {
+      toast.error("Please fill in both the Role and Company.");
+      return;
+    }
+
+    setShowCoverModal(false);
+    
+    if (setActiveDoc) {
+      setActiveDoc("cover");
+    }
+
+    setIsGeneratingCover(true);
+    const loadingToast = toast.loading("Analyzing your resume and generating cover letter...");
+
+    try {
+      // Pre-fill the cover letter fields with the targets
+      updateCoverLetter({ 
+        recipient: "Hiring Manager", 
+        company: coverTargetCompany,
+        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      });
+
+      const res = await fetch('/api/ai/generate-cover-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resume: resume,
+          role: coverTargetRole,
+          company: coverTargetCompany
+        })
+      });
+
+      const data = await res.json();
+      
+      if (data.result) {
+        updateCoverLetter({ body: data.result });
+        toast.success("Cover letter generated perfectly!", { id: loadingToast });
+      } else {
+        console.error(data.error);
+        toast.error(data.error || "Failed to generate.", { id: loadingToast });
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Network error. Failed to connect to AI.", { id: loadingToast });
+    } finally {
+      setIsGeneratingCover(false);
+      setCoverTargetRole("");
+      setCoverTargetCompany("");
+    }
+  };
+
+  const handleUploadCoverLetterPDF = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!user) {
+      setShowPaywall(true);
+      return;
+    }
+
+    const toastId = toast.loading("Uploading and parsing your PDF...");
+    const formData = new FormData();
+    formData.append('pdf', file);
+
+    try {
+      // 1. Parse PDF
+      const parseRes = await fetch('/api/ai/parse-resume', { method: 'POST', body: formData });
+      const parseData = await parseRes.json();
+      
+      if (!parseData.success) throw new Error(parseData.error || "Failed to parse PDF");
+      
+      toast.loading("PDF parsed. Generating cover letter...", { id: toastId });
+      setIsGeneratingCover(true);
+
+      // 2. Generate Cover Letter using parsed data
+      const genRes = await fetch('/api/ai/generate-cover-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resume: parseData.data,
+          role: "the open position", // Generic fallback
+          company: "the company" 
+        })
+      });
+
+      const genData = await genRes.json();
+      
+      if (genData.result) {
+        updateCoverLetter({ 
+          body: genData.result,
+          recipient: "Hiring Manager",
+          date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        });
+        toast.success("Cover letter generated from PDF!", { id: toastId });
+      } else {
+        throw new Error(genData.error || "Generation failed");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "An error occurred.", { id: toastId });
+    } finally {
+      setIsGeneratingCover(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleAddSkill = () => {
     const v = skillInput.trim();
@@ -334,6 +457,22 @@ export default function Editor({ activeDoc }) {
               <button onClick={handleAddSkill} className="px-4 bg-[#0066FF] text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Add</button>
             </div>
           </MinimalSection>
+          
+          <div className="mt-8 mb-4 border-t border-gray-200 dark:border-gray-800 pt-6 px-4">
+            <button
+              onClick={() => {
+                if (!user) {
+                  setShowPaywall(true);
+                  return;
+                }
+                setShowCoverModal(true);
+              }}
+              className="w-full py-3 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-medium flex items-center justify-center gap-2 shadow-sm shadow-indigo-500/25 transition-all"
+            >
+              <Sparkles size={18} />
+              Generate Cover Letter from this Resume
+            </button>
+          </div>
         </>
       ) : (
         <>
@@ -347,8 +486,41 @@ export default function Editor({ activeDoc }) {
           </MinimalSection>
           <MinimalSection title="Letter Body">
             <div className="flex flex-col">
-              <MinimalTextArea label="Main paragraphs" rows={12} value={coverLetter.body} onChange={(e) => updateCoverLetter({ body: e.target.value })} />
-              <div className="flex justify-end mt-[-10px] mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="block text-xs font-medium text-gray-700 dark:text-gray-300">Main paragraphs</span>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isGeneratingCover}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-[#0066FF] dark:hover:border-[#0066FF] hover:text-[#0066FF] dark:hover:text-[#0066FF] transition-colors shadow-sm disabled:opacity-70"
+                >
+                  {isGeneratingCover ? (
+                    <svg className="animate-spin h-3.5 w-3.5 text-[#0066FF]" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  ) : (
+                    <Upload size={14} />
+                  )}
+                  {isGeneratingCover ? "Generating..." : "Upload Resume PDF"}
+                </button>
+                <input 
+                  type="file" 
+                  accept=".pdf" 
+                  ref={fileInputRef} 
+                  style={{ display: 'none' }} 
+                  onChange={handleUploadCoverLetterPDF}
+                />
+              </div>
+              <textarea 
+                rows={12} 
+                value={coverLetter.body} 
+                onChange={(e) => updateCoverLetter({ body: e.target.value })} 
+                disabled={isGeneratingCover}
+                placeholder="Write your cover letter body here..."
+                className={`w-full border rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 outline-none transition-all resize-y mb-2 ${
+                  isGeneratingCover 
+                    ? 'border-indigo-400 dark:border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-pulse bg-indigo-50/30 dark:bg-indigo-900/10'
+                    : 'bg-gray-50 dark:bg-[#0a0b14] border-gray-200 dark:border-gray-700 focus:border-[#0066FF] dark:focus:border-[#0066FF]'
+                }`}
+              />
+              <div className="flex justify-end mt-1 mb-4">
                 <AIEnhanceButton 
                   text={coverLetter.body} 
                   role={personal.title} 
@@ -380,6 +552,67 @@ export default function Editor({ activeDoc }) {
           <option key={s} value={s} />
         ))}
       </datalist>
+
+      {/* Target Role & Company Modal */}
+      {showCoverModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-[#1a1b26] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Sparkles size={20} className="text-indigo-500" />
+                  Generate Cover Letter
+                </h2>
+                <button onClick={() => setShowCoverModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <X size={20} />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                Where are you applying? We'll tailor the cover letter specifically for this role using your resume's data.
+              </p>
+              
+              <div className="space-y-4 mb-8">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Role / Job Title</label>
+                  <input 
+                    type="text"
+                    value={coverTargetRole}
+                    onChange={(e) => setCoverTargetRole(e.target.value)}
+                    placeholder="e.g. Senior Product Designer"
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0a0b14] outline-none focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Company Name</label>
+                  <input 
+                    type="text"
+                    value={coverTargetCompany}
+                    onChange={(e) => setCoverTargetCompany(e.target.value)}
+                    placeholder="e.g. Google"
+                    className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0a0b14] outline-none focus:border-indigo-500"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowCoverModal(false)}
+                  className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleAutoGenerateCover}
+                  disabled={!coverTargetRole || !coverTargetCompany}
+                  className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  Generate Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

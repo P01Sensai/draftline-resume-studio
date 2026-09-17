@@ -386,34 +386,6 @@ export default function LoginPage() {
               </div>
             </div>
           </div>
-
-          {/* Bottom Social Credibility Banner */}
-          <div className="relative z-10 pt-6 mt-4 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <p className="font-label-sm text-label-sm text-slate-600">
-                Trusted by <strong className="text-slate-900 font-semibold">140,000+ candidates</strong> hired globally:
-              </p>
-              <div className="mt-2 flex items-center gap-4 text-slate-500 font-semibold text-xs tracking-wider uppercase">
-                <span className="hover:text-slate-900 transition-colors">Google</span>
-                <span className="text-slate-300">•</span>
-                <span className="hover:text-slate-900 transition-colors">Airbnb</span>
-                <span className="text-slate-300">•</span>
-                <span className="hover:text-slate-900 transition-colors">Figma</span>
-                <span className="text-slate-300">•</span>
-                <span className="hover:text-slate-900 transition-colors">Meta</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200 shadow-sm">
-              <div className="flex text-amber-500">
-                <span className="material-symbols-outlined text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                <span className="material-symbols-outlined text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                <span className="material-symbols-outlined text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                <span className="material-symbols-outlined text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                <span className="material-symbols-outlined text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star_half</span>
-              </div>
-              <span className="font-caption text-caption text-slate-800 font-bold">4.9 / 5</span>
-            </div>
-          </div>
         </div>
 
         {/* RIGHT COLUMN: Elegant Authentication Form Deck */}
@@ -590,14 +562,6 @@ export default function LoginPage() {
                   {isSignUp ? "Log In" : "Sign Up for free"}
                 </button>
               </p>
-            </div>
-
-            {/* Trust Indicator */}
-            <div className="mt-6 p-4 rounded-xl bg-white border border-slate-200/80 shadow-sm text-center">
-              <p className="font-body-sm text-body-sm text-slate-600 italic">
-                "Draftline's AI suggestions boosted my interview callback rate from 3% to over 34% within two weeks."
-              </p>
-              <span className="block mt-1 font-caption text-caption text-blue-600 font-medium">— Marcus Chen, Staff Engineer</span>
             </div>
           </div>
         </div>

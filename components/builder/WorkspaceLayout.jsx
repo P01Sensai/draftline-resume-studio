@@ -265,7 +265,7 @@ export default function WorkspaceLayout() {
         <div className="flex-1 max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-0 lg:gap-8 bg-[#f8f9fc] dark:bg-[#0a0b14] transition-colors">
           {/* Editor Side */}
           <div className="no-print bg-white dark:bg-[#1a1b26] border-r border-gray-200 dark:border-gray-800 overflow-y-auto transition-colors custom-scrollbar" style={{ height: 'calc(100vh - 61px)' }}>
-            <Editor activeDoc={activeDoc} />
+            <Editor activeDoc={activeDoc} setActiveDoc={setActiveDoc} />
           </div>
 
           {/* Preview Side */}

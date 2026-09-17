@@ -92,6 +92,8 @@ export const useResumeStore = create(
       setShowPaywallModal: (show) => set({ showPaywallModal: show }),
       showSessionExpiredModal: false,
       setShowSessionExpiredModal: (show) => set({ showSessionExpiredModal: show }),
+      showCoverLetterPromptModal: false,
+      setShowCoverLetterPromptModal: (show) => set({ showCoverLetterPromptModal: show }),
 
       // Dashboard Actions
       setStoreState: (newState) => set(newState),

@@ -145,7 +145,7 @@ export default function DashboardGrid() {
         }
       }}
       ref={containerRef} 
-      className="relative min-h-screen bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 font-body p-8 md:p-12 lg:p-16 overflow-hidden transition-colors"
+      className="relative min-h-screen bg-[#f8f9fc] dark:bg-[#0a0b14] text-gray-900 dark:text-gray-100 font-body p-8 md:p-12 lg:p-16 overflow-x-hidden transition-colors"
     >
       {/* Animated Subtle Aurora Blobs for Clean Slate Theme */}
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }} aria-hidden="true">
