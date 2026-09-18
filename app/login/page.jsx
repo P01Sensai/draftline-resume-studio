@@ -103,7 +103,7 @@ export default function LoginPage() {
         });
         if (error) throw error;
         if (data.user) {
-          router.push('/builder');
+          router.push('/');
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -112,7 +112,7 @@ export default function LoginPage() {
         });
         if (error) throw error;
         if (data.session) {
-          router.push('/builder');
+          router.push('/');
         }
       }
     } catch (err) {
@@ -127,7 +127,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/builder`
+          redirectTo: `${window.location.origin}/`
         }
       });
       if (error) throw error;
@@ -195,10 +195,6 @@ export default function LoginPage() {
                 </span>
               </div>
             </Link>
-            <div className="hidden sm:flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-label-sm text-label-sm px-3 py-1 rounded-full bg-white/85 dark:bg-slate-800/85 border border-slate-200 dark:border-slate-700/80 shadow-sm backdrop-blur-sm transition-colors">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-              <span className="font-medium text-slate-700 dark:text-slate-300">Draftline AI Engine Active</span>
-            </div>
           </div>
 
           {/* Central Hero Showcase & Mockup Stacks */}
