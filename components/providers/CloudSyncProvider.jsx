@@ -75,7 +75,12 @@ export default function CloudSyncProvider({ children }) {
         setStoreState({ isCloudSyncing: true });
         setUser(session?.user);
         initializeCloud();
-      } else if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setStoreState({ resumes: [defaultResume], activeResumeId: defaultResume.id });
+        prevResumesRef.current = null;
+        router.push('/login');
+      } else if (event === 'TOKEN_REFRESHED' && !session) {
         // Only show session expired if we were previously logged in
         if (useResumeStore.getState().user !== null) {
           setShowSession(true);
@@ -83,7 +88,6 @@ export default function CloudSyncProvider({ children }) {
         setUser(null);
         setStoreState({ resumes: [defaultResume], activeResumeId: defaultResume.id });
         prevResumesRef.current = null;
-        if (event === 'SIGNED_OUT') router.push('/login');
       }
     });
 
